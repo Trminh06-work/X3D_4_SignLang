@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=x3d_autsl
-#SBATCH --array=0-5
+#SBATCH --array=0-17
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
@@ -9,14 +9,14 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --time=72:00:00
-#SBATCH -o logs/%x_l_%a.out
-#SBATCH -e logs/%x_l_%a.err
+#SBATCH -o logs/%x_%A_%a.out
+#SBATCH -e logs/%x_%A_%a.err
 
 # Train one X3D variant per array task. The work itself lives in src/main.py.
 # The --array range above covers every entry in JOBS; override it for a subset.
 #   sbatch script/train.sh
 #   sbatch --array=0-5 script/train.sh
-#   sbatch script/train.sh script/train.conf
+#   sbatch script/train.sh script/other.conf
 
 set -eo pipefail
 
