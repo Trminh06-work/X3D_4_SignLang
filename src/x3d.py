@@ -84,10 +84,6 @@ class X3D():
     ):
         """
             Fit the current model using the given training data
-
-            Pass val_loader to score a held-out split after every epoch. The
-            training curve alone cannot show overfitting; the gap between the
-            two curves is what does.
         """
         # Standard multi-class classification setup
         criterion = nn.CrossEntropyLoss()
@@ -184,9 +180,6 @@ class X3D():
     def plot(self, path = None):
         """
             Draw the per-epoch loss and accuracy recorded by fit()
-
-            Loss and accuracy get a panel each rather than two y-axes on one
-            plot, which would invite reading a crossing that means nothing.
         """
         # Imported here so training does not depend on matplotlib
         import matplotlib.pyplot as plt
@@ -342,10 +335,6 @@ class X3D():
     def _gflops(self, clip):
         """
             Cost of one forward pass over a single clip
-
-            fvcore counts multiply-accumulates, which is what the X3D paper
-            reports as FLOPs, so these numbers are comparable to it. Returns
-            None if fvcore is not installed.
         """
         try:
             from fvcore.nn import FlopCountAnalysis
@@ -383,9 +372,8 @@ class X3D():
             Write the trained weights to disk
 
             Pass best = True to write the epoch that scored highest on the
-            validation split instead of the last one, which a long run has
-            usually drifted past. Falls back to the final weights when fit()
-            was given no validation split.
+            validation split instead of the last one.
+            Falls back to the final weights when fit() was given no validation split.
         """
         if best and self.best["state"] is not None:
             torch.save(self.best["state"], path)

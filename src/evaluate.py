@@ -1,8 +1,5 @@
 """
     Score every saved checkpoint on the AUTSL test split.
-
-    Run from the project root:
-        python -m src.evaluate
 """
 
 import csv

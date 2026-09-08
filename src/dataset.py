@@ -161,8 +161,6 @@ class AUTSLDataset(Dataset):
     def _decode(self, index):
         """
             Decode one clip to uint8 [T, C, H, W] at the variant's geometry
-
-            Nothing here depends on the epoch, which is what makes it cacheable.
         """
         clip, _ = self.samples[index]
 

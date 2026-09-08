@@ -1,8 +1,5 @@
 """
     Fine-tune one X3D variant on AUTSL, then save its weights and training curve.
-
-    Run from the project root:
-        python -m src.main
 """
 
 import os
@@ -29,8 +26,6 @@ def main(
 ):
     """
         Train one variant and write its state_dict and training curve
-
-        Returns the fitted X3D so a notebook can keep using it.
     """
     # The variant dictates the clip geometry, and raises if it is unknown
     num_frames, crop_size = X3D.geometry(model_size)
@@ -49,7 +44,6 @@ def main(
             num_workers = num_workers,
         )
 
-        # Reading the cache is the bottleneck, so give it every allocated CPU
         return DataLoader(
             data,
             batch_size = batch_size,
