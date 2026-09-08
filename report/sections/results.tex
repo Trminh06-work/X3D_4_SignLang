@@ -83,11 +83,6 @@ $5$ & $48.0$ & $19.9$ & $64.3$ & $36.5$ & $69.8$ & $38.5$ \\
 \end{table}
 
 
-\paragraph{How many blocks should be frozen?} As can be seen in \textbf{Table \ref{tab:val_sweep}}, freezing from 0 to 2 blocks giving roughly equivalent validation accuracy, and undoubtedly freezing more blocks cost less than fewer blocks.
-Meanwhile, training the classifier head alone does not offer competitive performance, similarly, letting the adjacent block to be trained give much higher accuracy, though not as well as unfreeze more blocks.
-Therefore, we highly recommend enabling training 3 to 4 blocks, to maximise the models' learning capacity while maintaining computing efficiency.
-
-
 \paragraph{Underfitting and overfitting.} The two failure modes occur at opposite ends of the sweep, and \textbf{Table \ref{tab:val_sweep}} separates them.
 Training the classifier head alone underfits: those runs reach only $48.0\%$, $64.3\%$ and $69.8\%$ accuracy on the split they are trained on, for \texttt{X3D\_XS}, \texttt{X3D\_S} and \texttt{X3D\_M} respectively, whereas every run with at least one block unfrozen exceeds $92\%$.
 A model that cannot fit half of its own training data is not overfitting, and the limitation is therefore representational rather than statistical, i.e. frozen \texttt{Kinetics--400} features are not separable into $226$ signs by a linear map.
@@ -147,59 +142,51 @@ The four--frame clip of \texttt{X3D\_XS} is the more plausible culprit, since a 
 \end{table}
 
 \paragraph{Freezing depth.} Training the whole network rather than the head alone adds $39.4$, $46.3$ and $47.5$ top--1 points for \texttt{X3D\_XS}, \texttt{X3D\_S} and \texttt{X3D\_M}, at $2.4\times$ the trainable parameters.
-The return is heavily front--loaded: unfreezing one further block, i.e. \texttt{res}$_5$, already recovers most of it, lifting \texttt{X3D\_M} from $34.86\%$ to $73.62\%$ for $1.35$M extra trainable parameters.
-Thereafter the curve flattens, and the best test result is reached at one frozen block for both \texttt{X3D\_XS} and \texttt{X3D\_S}.
+Interestingly, by unfreezing only one block adjacent to the head block, i.e. \texttt{res}$_5$, lifts \texttt{X3D\_M} from $34.86\%$ to $73.62\%$ for $1.35$M extra trainable parameters, likewise for \texttt{X3D\_XS} and \texttt{X3D\_S}.
+Thereafter, unfreezing other blocks gain more accuracy, though not a big jump as before.
 
 \paragraph{Model size.} Moving from \texttt{X3D\_XS} to \texttt{X3D\_S} costs $3.2\times$ the GFLOPs and returns $19.7$ top--1 points; the further step to \texttt{X3D\_M} costs $2.4\times$ again for only $5.8$.
 The longer clip is therefore not wasted on isolated signs, but its value saturates.
 
-\paragraph{Error type.} The top--1 to top--3 margin is widest for \texttt{X3D\_XS} ($17.7$ points at one frozen block) and narrowest for \texttt{X3D\_M} ($12.2$ at two).
-Following \textbf{Sec. \ref{sec:metrics}}, the small variant's errors are largely near misses among confusable signs, whereas the residual errors of \texttt{X3D\_M} are more often outright failures.
+\paragraph{Error type.} The top--1 to top--3 margin is widest for \texttt{X3D\_XS} and narrowest for \texttt{X3D\_M}.
+We shall claim, though insignificantly different, that the small variant's errors are largely near misses among confusable signs, whereas the residual errors of \texttt{X3D\_M} are more often outright failures.
 
 \subsubsection{Generalising to our data}
 
-This section is separated from the above–testing section. This serves to showcase the generalisation of our ``best'' \texttt{X3D} variant, as we believe the test set still shares some underlying patterns with the train set, e.g. personal identity, environment background and experimental bias.
-To build this dataset manually, we shall rely on the \texttt{id} of the public dataset, watch their videos, attempt to replicate their motions and eventually annotate using the same \texttt{id}, as our model learnt from the numerically indexed classes, not text–based classes.
+We separate this section from the testing above, since the test split still shares underlying patterns with the train split, e.g. signer identity, background and experimental bias.
+To build the dataset we watched the public clips, replicated their motions and annotated with the same numeric \texttt{id}, as the model learnt indexed rather than text--based classes.
+Also, it poses more challenges, as we cannot mimic the mouth movements that some signs involve, our lighting is poor and introduces scattering, and \texttt{AUTSL} records the full body whereas we recorded only the upper half.
 
-More specifically, this hand–crafted dataset poses some problems which we note the most apparent herein.
-First, sign language may involve mouth movement, and thus, we are unable to mimic their mouth, which may diverge from what the models are trained on.
-Second, the lighting conditions are poor, which may introduce blue and light scattering into the videos.
-Third, in \texttt{AUTSL}, most people were recorded with their full body, whereas, in our hand–crafted data, we only recorded from the upper half of the body.
-
-\paragraph{Setup.} We recorded ten clips on a laptop camera at $1620\times1080$, each imitating one \texttt{AUTSL} sign and named after the test clip whose label it borrows; the footage itself is our own, so that none of these clips is \texttt{AUTSL} material and only the labelling convention is shared.
-They were converted to \texttt{mp4} and passed through the pipeline of \textbf{Sec. \ref{sec:implementation}} unchanged, i.e. uniform subsampling to $16$ frames at $224^2$, then classified by \texttt{X3D\_M} with two frozen blocks on a CPU.
+\paragraph{Setup.} We recorded ten clips on a laptop camera at $1620\times1080$, each imitating one \texttt{AUTSL} sign and named after the test clip whose label it borrows.
+In other words, the footage itself is our own and only the labelling convention is shared.
+They were converted to \texttt{mp4} and passed through the pipeline of \textbf{Sec. \ref{sec:implementation}}. We run the inference on this hand–crafted data using CPU on MacBook M3 Pro.
 
 \begin{table}[H]
 \centering\small
-\begin{tabular}{@{}c c c c c@{}}
+\begin{tabular}{@{}c c c c c c@{}}
 \toprule
-\textbf{Clip} & \textbf{True class} & \textbf{Predicted} & \textbf{Confidence} & \textbf{Rank of true class} \\
+\textbf{Clip} & \textbf{True class} & \textbf{Predicted (top–1)} & \textbf{Confidence} & \textbf{Inference time (s)} \\
 \midrule
-$0$ & $161$ & $161$ & $1.000$ & $1$ \\
-$1$ & $77$  & $77$  & $0.667$ & $1$ \\
-$2$ & $22$  & $18$  & $0.974$ & $>5$ \\
-$3$ & $157$ & $213$ & $0.860$ & $>5$ \\
-$4$ & $112$ & $32$  & $0.680$ & $5$ \\
-$5$ & $128$ & $54$  & $0.703$ & $>5$ \\
-$6$ & $14$  & $14$  & $1.000$ & $1$ \\
-$7$ & $5$   & $5$   & $1.000$ & $1$ \\
-$8$ & $23$  & $23$  & $0.987$ & $1$ \\
-$9$ & $155$ & $155$ & $0.999$ & $1$ \\
+$0$ & $161$ & $161$ & $1.000$ & 0.369 \\
+$1$ & $77$  & $77$  & $0.667$ & 0.331\\
+$2$ & $22$  & $18$  & $0.974$ & 0.343\\
+$3$ & $157$ & $213$ & $0.860$ & 0.310\\
+$4$ & $112$ & $32$  & $0.680$ & 0.328\\
+$5$ & $128$ & $54$  & $0.703$ & 0.313\\
+$6$ & $14$  & $14$  & $1.000$ & 0.316\\
+$7$ & $5$   & $5$   & $1.000$ & 0.340\\
+$8$ & $23$  & $23$  & $0.987$ & 0.332\\
+$9$ & $155$ & $155$ & $0.999$ & 0.404\\
 \bottomrule
 \end{tabular}
 \caption{Predictions of \texttt{X3D\_M} with two frozen blocks on ten self--recorded clips. Confidence is the \texttt{softmax} probability of the predicted class.}
 \label{tab:custom}
 \end{table}
 
-\paragraph{Accuracy.} As collected in \textbf{Table \ref{tab:custom}}, the model recognises six of the ten clips, i.e. $60\%$ top--1, $60\%$ top--3 and $70\%$ top--5, against $82.28\%$, $94.49\%$ and $96.52\%$ on the \texttt{AUTSL} test split.
-Ten clips is far too small a sample to measure a gap, since one clip is worth ten points, but the direction is what the section set out to check and it is the expected one.
-
-\paragraph{Error type.} The four errors are not near misses: three place the true sign outside the top five altogether, and only clip $4$ recovers it at rank five.
-This is unlike the test split, where the top--1 to top--3 margin of $12.2$ points indicated confusion among similar signs.
-Under a genuine change of signer, camera and background, the model fails outright rather than hesitating between candidates.
+\paragraph{Accuracy.} As collected in \textbf{Table \ref{tab:custom}}, the model recognises six of the ten clips, i.e. $60\%$ top--1, $60\%$ top--3 and $70\%$ top--5, yet incomparable with the test results in \textbf{Table \ref{tab:main_results}} due to insufficient samples.
 
 \paragraph{Confidence.} The wrong predictions are as confident as the right ones, i.e. $0.68$ to $0.97$ against $0.67$ to $1.00$.
 Softmax confidence therefore offers no usable signal for rejecting an out--of--distribution clip.
 
-\paragraph{Latency.} Inference took $0.293$ to $0.372$ seconds per clip, $0.325$ on average, on a CPU alone.
-This is the wall--clock figure that GFLOPs cannot supply, as noted in \textbf{Sec. \ref{sec:metrics}}, and it suggests the variant is deployable at interactive speed without a GPU.
+\paragraph{Latency.} Inference took $0.310$ to $0.404$ seconds per clip, $0.339$ on average, on a CPU alone.
+It suggests the model is deployable for real–time inference.

@@ -15,9 +15,7 @@ In particular, the \textbf{Table \ref{tab:x3d_arch}} presents the conceptual des
 As reported, \texttt{X2D} has 20.67M FLOPS and 1.63M parameters.
 Interestingly, comparing to the SlowFast networks \cite{feichtenhofer2019slowfast}, \texttt{X2D} can be viewed as the Slow pathway in the SlowFast networks since it solely uses one single frame at once, while its width is much lighter and similar to the Fast pathway.
 
-Looking at \textbf{Table \ref{tab:x3d_arch}}, specifically at the output sizes column, across all stages, except the final stage, \texttt{X2D} preserves the same $\xgt$, i.e. the temporal input resolution, while reducing spatio resolution.
-Note that, the channel dimension is omitted, and one may realise the resulting channel capacity by looking at the filters column.
-The preservation of temporal dimension resembles the SlowFast pathways \cite{feichtenhofer2019slowfast}, and thus, able to retain all temporal signals across features per stage.
+As the output sizes column of \textbf{Table \ref{tab:x3d_arch}} shows, \texttt{X2D} preserves the temporal resolution $\xgt$ at every stage but the last while reducing the spatial one, which resembles the SlowFast pathways \cite{feichtenhofer2019slowfast} and thus retains all temporal signal across features per stage.
 
 The difference between 2D and 3D CNNs are attributed to the number of dimensions of the kernel block, particularly, for 2D CNNs, the kernel is a matrix, whereas for 3D CNNs, the kernel is a 3D tensor.
 We shall denote the 3D kernel block with a spatiotemporal size of $T \times S^2$, where $T$ is the temporal length/duration and $S$ is the width and height, as square matrix is commonly used as kernel in 2D CNNs.

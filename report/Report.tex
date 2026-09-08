@@ -114,6 +114,7 @@
     We fine–tune three \texttt{Kinetics–400}–pretrained variants on the \texttt{AUTSL} dataset \cite{sincan2020autsl} of $226$ Turkish signs at six freezing depths, from no frozen block, i.e. the whole network is trained, to five, i.e. only the classifier head is trained.
     The best configuration, \texttt{X3D\_M} with two frozen blocks, reaches $82.28\%$ top--1 on the test split at $4.90$ GFLOPs per clip, whereas training the head alone reaches $34.86\%$.
     Since the three variants share one parameter count, accuracy on this task is bought with the length of the clip sampled rather than with model capacity.
+    The implementation can be found in \href{https://github.com/Trminh06-work/X3D_4_SignLang.git}{this repository} and the data is available in \href{https://www.kaggle.com/datasets/baominhtran06/sit332-autsl4x3d}{this link}.
 \end{abstract}
 
 \setcounter{tocdepth}{3}

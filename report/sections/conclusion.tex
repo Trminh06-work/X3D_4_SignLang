@@ -8,13 +8,11 @@ On the second, the larger variant repays its cost only in part.
 The step from \texttt{X3D\_XS} to \texttt{X3D\_S} returns $19.7$ points for $3.2\times$ the GFLOPs, whereas the step to \texttt{X3D\_M} returns $5.8$ for a further $2.4\times$.
 Since all three variants share one parameter count, this is the price of sampling a longer clip rather than of a larger model.
 
-Two limitations should be stated plainly.
+\paragraph{Limitations.}
 Each configuration was trained once, so differences of one or two points cannot be separated from seed variance.
 Only the RGB modality was used, leaving the depth and skeleton streams of \texttt{AUTSL} unexploited, and GFLOPs measures arithmetic rather than latency on an actual edge device.
 Another limitation is, the model can only predicts 226 Turkish isolated signs, any thus, fails to predict out–of–distribution data.
 
-\paragraph{Future work.} The current version of \texttt{X3D} in \texttt{PyTorchVideo} is a bit faster than its original implementation in \cite{feichtenhofer2020x3d, pyslowfast}.
-Nonetheless, it has not yet achieved a desirable criteria to deploy to edge devices. Indeed, \texttt{PyTorchVideo} supports \texttt{EfficientX3D} for edge devices deployment, though only two versions \texttt{X3D\_XS} and \texttt{X3D\_S} have pretrained weights from \texttt{Kinetics–400}, \href{https://github.com/facebookresearch/pytorchvideo/blob/f3142bb05cdb56af0704ab6f0adfb0c7bbafe4a0/pytorchvideo/models/hub/efficient_x3d_mobile_cpu.py}{see here}.
-Meanwhile, several papers \cite{LI2020103853, 7426826} empirically proved that, for small–scale experiments (limited training data), fine–tuning (a subset of transfer learning) mostly beats training–from–scratch strategy.
-Applications of transfer learning to sign language recognition tasks have been done in \cite{10627077, töngi2021applicationtransferlearningsign,shuchang2022surveyhumanactionrecognition,han2022efficient}.
-Therefore, we shall leave the implementation of \texttt{EfficientX3D} as future extensions due to lack of pretrained weights.
+\paragraph{Future work.} \texttt{PyTorchVideo}'s \texttt{X3D} is faster than the original implementation \cite{feichtenhofer2020x3d, pyslowfast}, yet still short of what edge deployment demands.
+\texttt{PyTorchVideo} also supports \texttt{EfficientX3D} for that purpose, but only \texttt{X3D\_XS} and \texttt{X3D\_S} carry \texttt{Kinetics–400} weights, \href{https://github.com/facebookresearch/pytorchvideo/blob/f3142bb05cdb56af0704ab6f0adfb0c7bbafe4a0/pytorchvideo/models/hub/efficient_x3d_mobile_cpu.py}{see here}.
+Since fine--tuning outperforms training from scratch on small datasets \cite{LI2020103853, 7426826}, as applied to sign language recognition in \cite{10627077, töngi2021applicationtransferlearningsign, shuchang2022surveyhumanactionrecognition, han2022efficient}, we leave \texttt{EfficientX3D} to future work for want of pretrained weights.

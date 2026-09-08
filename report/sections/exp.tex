@@ -25,9 +25,8 @@ FPS & 30 \\
 \label{tab:AUTSL_description}
 \end{table}
 
-Regarding challenges, these videos were recorded in a wide variety of backgrounds, some are static while others are dynamic, meaning that, it may consist of moving objects behind the scenes.
-In addition, the authors intentionally selected signs that are very similar in motions, and very subtle gestures to distinguish them. Besides, they also included some compound signs, like in spoken language, these signs are made of more than two simple signs.
-Importantly, different signers may possess their own signatures while using sign languages, and thus, the authors asked people with different background to participate in the creation of this dataset.
+Regarding challenges, the videos span a wide variety of static and dynamic backgrounds, the latter containing objects moving behind the signer.
+The authors further selected signs that are very similar in motion and separated only by subtle gestures, included compound signs built from simpler ones, and recruited signers of differing backgrounds, so that personal signing style varies across the dataset.
 
 
 In this experiment, we leverage the available \texttt{AUTSL} dataset given in Kaggle, accessible via \href{https://www.kaggle.com/datasets/sttaseen/autsl}{this link}.
@@ -51,11 +50,9 @@ Total & $36,302$ & 100\% \\
 \label{tab:AUTSL_samples}
 \end{table}
 
-Apparently, \textbf{Table \ref{tab:AUTSL_description}} and \textbf{Table \ref{tab:AUTSL_samples}} differ in the number of total samples, we suspect there are some data shifts between the Kaggle dataset and the original one.
-Therefore, we shall inspect again the statistics of the current dataset, mainly rely on the filenames, as shown in \textbf{Figure \ref{fig:data-inspect-1}} and \textbf{Figure \ref{fig:data-inspect-2}}.
-We further note that $10$ clips in the train split and $1$ in the test split are truncated and cannot be decoded, and are skipped throughout, which is why $28{,}132$ and $3{,}741$ clips are actually used.
-Noticeably, there exist some corrupted videos in the dataset, which are excluded from training and testing stages, details can be found in the implementation of this project.
-The figures shown below still inspect the whole dataset rather than dropping 11 corrupted videos (10 in train set and 1 in test set).
+Apparently, \textbf{Table \ref{tab:AUTSL_description}} and \textbf{Table \ref{tab:AUTSL_samples}} differ in the total number of samples, suggesting a data shift between the Kaggle release and the original.
+We therefore re–inspect the dataset from its filenames in \textbf{Figure \ref{fig:data-inspect-1}} and \textbf{Figure \ref{fig:data-inspect-2}}, which still count every clip.
+Of these, $11$ are truncated and cannot be decoded, i.e. $10$ in train and $1$ in test, and are excluded from both training and testing, leaving the $28{,}132$ and $3{,}741$ clips actually used.
 
 \begin{figure}[H]
     \centering
