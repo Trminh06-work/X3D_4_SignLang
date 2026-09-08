@@ -16,18 +16,18 @@ As reported, \texttt{X2D} has 20.67M FLOPS and 1.63M parameters.
 Interestingly, comparing to the SlowFast networks \cite{feichtenhofer2019slowfast}, \texttt{X2D} can be viewed as the Slow pathway in the SlowFast networks since it solely uses one single frame at once, while its width is much lighter and similar to the Fast pathway.
 
 Looking at \textbf{Table \ref{tab:x3d_arch}}, specifically at the output sizes column, across all stages, except the final stage, \texttt{X2D} preserves the same $\xgt$, i.e. the temporal input resolution, while reducing spatio resolution.
-Note that, the channel dimesion is omitted, and one may realise the resulting channel capacity by looking at the filters column.
+Note that, the channel dimension is omitted, and one may realise the resulting channel capacity by looking at the filters column.
 The preservation of temporal dimension resembles the SlowFast pathways \cite{feichtenhofer2019slowfast}, and thus, able to retain all temporal signals across features per stage.
 
-The difference between 2D and 3D CNNs are attribute to the number of dimensions of the kernel block, particularly, for 2D CNNs, the kernel is a matrix, whereas for 3D CNNs, the kernel is a 3D tensor.
-We shall denote the 3D kernel block with a spatialtemporal size of $T \times S^2$, where $T$ is the temporal length/duration and $S$ is the width and height, as square matrix is commonly used as kernel in 2D CNNs.
+The difference between 2D and 3D CNNs are attributed to the number of dimensions of the kernel block, particularly, for 2D CNNs, the kernel is a matrix, whereas for 3D CNNs, the kernel is a 3D tensor.
+We shall denote the 3D kernel block with a spatiotemporal size of $T \times S^2$, where $T$ is the temporal length/duration and $S$ is the width and height, as square matrix is commonly used as kernel in 2D CNNs.
 
 
 
 \subsection{Expansion operations and mechanisms}
 \label{sec:expand_dim_and_method}
 
-To extend a tiny spatial network \texttt{X2D} to a spatialtemporal network \texttt{X3D}, \cite{feichtenhofer2020x3d} recommends six possible expansion operations, defined to scale four dimensions, i.e. temporal, spatial, width and depth as follows.
+To extend a tiny spatial network \texttt{X2D} to a spatiotemporal network \texttt{X3D}, \cite{feichtenhofer2020x3d} recommends six possible expansion operations, defined to scale four dimensions, i.e. temporal, spatial, width and depth as follows.
 
 \begin{itemize}
     \item \textbf{X–Fast}: expands $\xgt$ by increasing the frame rate $1 / \xgtau$.
@@ -178,7 +178,7 @@ In order to ensure this expansion rate, \cite{feichtenhofer2020x3d} provides det
 \end{table}
 
 % This grouping is the unit of adaptation used in \textbf{Section \ref{sec:experiment}}, where freezing $k$ blocks means holding \texttt{blocks[0]} to \texttt{blocks[$k-1$]} fixed, so that $k = 0$ trains the whole network and $k = 5$ trains the classifier head alone.
-Concretely, \texttt{X3D} is a feature extractor of a video. Conceptually, this can be represented using the following diagram:
+Concretely, \texttt{X3D} is a feature extractor of a video. Conceptually, this can be represented as in \textbf{Figure \ref{fig:x3d_pipeline}} below:
 
 \begin{figure}[H]
     \centering
@@ -214,8 +214,8 @@ Concretely, \texttt{X3D} is a feature extractor of a video. Conceptually, this c
     \label{fig:x3d_pipeline}
 \end{figure}
 
-The 2D CNN processes the whole image by learning local information stage by stage, untill the final blocks are sufficiently dense,
-and hence, a classfier, typically MLP, is used to yield final prediction.
+The 2D CNN processes the whole image by learning local information stage by stage, until the final blocks are sufficiently dense,
+and hence, a classifier, typically MLP, is used to yield final prediction.
 The 3D CNN generalises this concept by considering multiple frames at once, thereby allowing the model to understand the underlying temporal dependence inherently in video data, and keeps other aspects of 2D CNN as is.
 Put simply, both 2D and 3D CNNs are simply feature extractors, said differently, it learns to transform raw data into numerically meaningful vectors.
 

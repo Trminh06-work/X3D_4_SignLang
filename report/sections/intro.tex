@@ -4,12 +4,12 @@ Action Recognition is a dynamic and leading research area in Computer Vision, pr
 Its development is closely tied with several real-world applications.
 In medical environment, the number of patients usually outnumber the number of skilled staff.
 Therefore, medical robots are essentially important to reduce the workload, and thus, they must be smoothly integrated and capable of understanding the current states and work without explicit instructions from staff \cite{Stabenow2026}.
-Another application is early criminal activity recognition from surveilliance cameras in real-time manner \cite{LIM2023}, and other applications can be found in \cite{HEO202632, KongFu2022}.
+Another application is early criminal activity recognition from surveillance cameras in real-time manner \cite{LIM2023}, and other applications can be found in \cite{HEO202632, KongFu2022}.
 Due to their prevalence and significant impacts in real-world practices, various models have been proposed, e.g. X3D \cite{feichtenhofer2020x3d}, SlowFast \cite{feichtenhofer2019slowfast}, Two-streams CNN–based networks \cite{simonyan2014twostream}, and MViT \cite{fan2021mvit, li2022mvitv2}.
 
-Nonetheless, there are innegligable obstacles associated with Action Recognition applications, and the above-mentioned models cannot overcome all of these. As surveyed in \cite{HEO202632,KongFu2022}, one action is likely performed in various ways by different people,
+Nonetheless, there are non-negligible obstacles associated with Action Recognition applications, and the above-mentioned models cannot overcome all of these. As surveyed in \cite{HEO202632,KongFu2022}, one action is likely performed in various ways by different people,
 video quality is worsened in outdoor recordings, insufficient annotated data, some actions cannot be well-interpreted and many more.
-Importantly, Computer Vison applications are mostly deployed to edge devices whose computing capacities are limited while demanding low latency and real–time inference accuracy \cite{MoViNets, DeepRT}.
+Importantly, Computer Vision applications are mostly deployed to edge devices whose computing capacities are limited while demanding low latency and real–time inference accuracy \cite{MoViNets, DeepRT}.
 Therefore, this report is interested in exploring a model, namely X3D \cite{feichtenhofer2020x3d}, originally implemented using \texttt{PyTorchVideo} \cite{fan2021pytorchvideo}, which offers competitive efficacy in terms of floating point operations (FLOPs) and parameters while maintaining relatively good accuracy, which is installable on edge devices.
 
 Within the realm of action recognition, sign language recognition is particularly intersting due to its practical significance.

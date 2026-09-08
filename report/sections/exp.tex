@@ -30,8 +30,8 @@ In addition, the authors intentionally selected signs that are very similar in m
 Importantly, different signers may possess their own signatures while using sign languages, and thus, the authors asked people with different background to participate in the creation of this dataset.
 
 
-In this experiment, we leverage the available \texttt{AUTSL} dataset given in Kaggle, accessible via this link: https://www.kaggle.com/datasets/sttaseen/autsl.
-This dataset only comprises of RGB-colored videos, for a comprehensive dataset of \texttt{AUTSL}, including different video formats of the same data, refer to this link: https://cvml.ankara.edu.tr/datasets/.
+In this experiment, we leverage the available \texttt{AUTSL} dataset given in Kaggle, accessible via \href{https://www.kaggle.com/datasets/sttaseen/autsl}{this link}.
+This dataset only comprises of RGB-colored videos, for a comprehensive dataset of \texttt{AUTSL}, including different video formats of the same data, refer to \href{https://cvml.ankara.edu.tr/datasets/}{this link}.
 Therefore, by utilisation of Kaggle dataset, we limit ourselves to benchmark \texttt{X3D} performance on RGB–colored videos. Lastly, the downloaded data was already partitioned, and thus, we shall not split the dataset by our own.
 
 \begin{table}[H]
@@ -52,7 +52,8 @@ Total & $36,302$ & 100\% \\
 \end{table}
 
 Apparently, \textbf{Table \ref{tab:AUTSL_description}} and \textbf{Table \ref{tab:AUTSL_samples}} differ in the number of total samples, we suspect there are some data shifts between the Kaggle dataset and the original one.
-Therefore, we shall inspect again the statistics of the current dataset, mainly rely on the filenames.
+Therefore, we shall inspect again the statistics of the current dataset, mainly rely on the filenames, as shown in \textbf{Figure \ref{fig:data-inspect-1}} and \textbf{Figure \ref{fig:data-inspect-2}}.
+We further note that $10$ clips in the train split and $1$ in the test split are truncated and cannot be decoded, and are skipped throughout, which is why $28{,}132$ and $3{,}741$ clips are actually used.
 Noticeably, there exist some corrupted videos in the dataset, which are excluded from training and testing stages, details can be found in the implementation of this project.
 The figures shown below still inspect the whole dataset rather than dropping 11 corrupted videos (10 in train set and 1 in test set).
 
@@ -74,7 +75,7 @@ The figures shown below still inspect the whole dataset rather than dropping 11 
     \label{fig:data-inspect-2}
 \end{figure}
 
-\paragraph{Dataset building.} According to the models' sizes in \href{https://github.com/facebookresearch/pytorchvideo/blob/f3142bb05cdb56af0704ab6f0adfb0c7bbafe4a0/pytorchvideo/models/x3d.py#L539}{this code}.
+\paragraph{Dataset building.} According to the models' sizes in \href{https://github.com/facebookresearch/pytorchvideo/blob/f3142bb05cdb56af0704ab6f0adfb0c7bbafe4a0/pytorchvideo/models/x3d.py#L539}{this code}, we adopt the clip geometry summarised in \textbf{Table \ref{tab:model_sizes}}.
 \begin{table}[H]
     \centering\small
     \begin{tabular}{@{}c c c@{}}
@@ -92,6 +93,7 @@ The figures shown below still inspect the whole dataset rather than dropping 11 
 \texttt{AUTSL} dataset must be built with the matching \texttt{num\_frames} and \texttt{crop\_size}, otherwise the weights load but the model sees inputs it was never trained for.
 
 \subsection{Implementation details}
+\label{sec:implementation}
 % Describe the experimental environment
 
 

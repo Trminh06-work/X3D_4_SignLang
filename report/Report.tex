@@ -111,11 +111,12 @@
     Action recognition models are increasingly deployed on devices whose compute budget is far smaller than the one they were designed on. 
     \texttt{X3D} \cite{feichtenhofer2020x3d} addresses this by expanding a small 2D architecture one axis at a time, trading accuracy against cost explicitly. 
     This report summarises \texttt{X3D} and its realisation in \texttt{PyTorchVideo} \cite{fan2021pytorchvideo}, then asks how well its \texttt{Kinetics--400} representation transfers to isolated sign language recognition. 
-    We fine–tune three \texttt{Kinetics–400}–pretrained variants on the \texttt{AUTSL} dataset \cite{sincan2020autsl} of $226$ Turkish signs, at sixtwo depths, increasingly freeze from 0 block, i.e. the whole network to 5 blocks, i.e. only classifier head is trained.
-    \textcolor{red}{State the headline top--1 for the best configuration, the gap between the two fine--tuning depths, and the cost in GFLOPs at which it was obtained.} \textcolor{red}{Close with the one sentence a reader should take away about the accuracy--cost trade--off on this task.}
+    We fine–tune three \texttt{Kinetics–400}–pretrained variants on the \texttt{AUTSL} dataset \cite{sincan2020autsl} of $226$ Turkish signs at six freezing depths, from no frozen block, i.e. the whole network is trained, to five, i.e. only the classifier head is trained.
+    The best configuration, \texttt{X3D\_M} with two frozen blocks, reaches $82.28\%$ top--1 on the test split at $4.90$ GFLOPs per clip, whereas training the head alone reaches $34.86\%$.
+    Since the three variants share one parameter count, accuracy on this task is bought with the length of the clip sampled rather than with model capacity.
 \end{abstract}
 
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{3}
 \tableofcontents
 \newpage
 

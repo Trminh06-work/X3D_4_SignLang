@@ -83,9 +83,9 @@ $5$ & $48.0$ & $19.9$ & $64.3$ & $36.5$ & $69.8$ & $38.5$ \\
 \end{table}
 
 
-\paragraph{How many blocks should be frozen?} As can be seen in \textbf{Tab. \ref{tab:val_sweep}}, freezing from 0 to 2 blocks giving roughly equivalent validation accuracy, and undoubtedly freezing more blocks cost less than fewer blocks.
-Meanwhile, training the classfier head alone does not offer competitive performance, similarly, letting the adjancent block to be trained give much higher accuracy, though not as well as unfreeze more blocks.
-Therefore, we highly recommend enabling training 3 to 4 blocks, to maximise the models' learning capacity while maintaing computing efficiency.
+\paragraph{How many blocks should be frozen?} As can be seen in \textbf{Table \ref{tab:val_sweep}}, freezing from 0 to 2 blocks giving roughly equivalent validation accuracy, and undoubtedly freezing more blocks cost less than fewer blocks.
+Meanwhile, training the classifier head alone does not offer competitive performance, similarly, letting the adjacent block to be trained give much higher accuracy, though not as well as unfreeze more blocks.
+Therefore, we highly recommend enabling training 3 to 4 blocks, to maximise the models' learning capacity while maintaining computing efficiency.
 
 
 \paragraph{Underfitting and overfitting.} The two failure modes occur at opposite ends of the sweep, and \textbf{Table \ref{tab:val_sweep}} separates them.
@@ -166,8 +166,8 @@ First, sign language may involve mouth movement, and thus, we are unable to mimi
 Second, the lighting conditions are poor, which may introduce blue and light scattering into the videos.
 Third, in \texttt{AUTSL}, most people were recorded with their full body, whereas, in our hand–crafted data, we only recorded from the upper half of the body.
 
-\paragraph{Setup.} We recorded ten clips on a laptop camera at $1620\times1080$, each imitating one \texttt{AUTSL} sign and named after the test clip whose label it borrows; the footage itself is our own.
-They were converted to \texttt{mp4} and passed through the pipeline of \textbf{Sec. \ref{sec:experiment}} unchanged, i.e. uniform subsampling to $16$ frames at $224^2$, then classified by \texttt{X3D\_M} with two frozen blocks on a CPU.
+\paragraph{Setup.} We recorded ten clips on a laptop camera at $1620\times1080$, each imitating one \texttt{AUTSL} sign and named after the test clip whose label it borrows; the footage itself is our own, so that none of these clips is \texttt{AUTSL} material and only the labelling convention is shared.
+They were converted to \texttt{mp4} and passed through the pipeline of \textbf{Sec. \ref{sec:implementation}} unchanged, i.e. uniform subsampling to $16$ frames at $224^2$, then classified by \texttt{X3D\_M} with two frozen blocks on a CPU.
 
 \begin{table}[H]
 \centering\small
@@ -191,7 +191,7 @@ $9$ & $155$ & $155$ & $0.999$ & $1$ \\
 \label{tab:custom}
 \end{table}
 
-\paragraph{Accuracy.} The model recognises six of the ten clips, i.e. $60\%$ top--1, $60\%$ top--3 and $70\%$ top--5, against $82.28\%$, $94.49\%$ and $96.52\%$ on the \texttt{AUTSL} test split.
+\paragraph{Accuracy.} As collected in \textbf{Table \ref{tab:custom}}, the model recognises six of the ten clips, i.e. $60\%$ top--1, $60\%$ top--3 and $70\%$ top--5, against $82.28\%$, $94.49\%$ and $96.52\%$ on the \texttt{AUTSL} test split.
 Ten clips is far too small a sample to measure a gap, since one clip is worth ten points, but the direction is what the section set out to check and it is the expected one.
 
 \paragraph{Error type.} The four errors are not near misses: three place the true sign outside the top five altogether, and only clip $4$ recovers it at rank five.
