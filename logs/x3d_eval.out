@@ -1,0 +1,19 @@
+ M freeze0  top1 0.8238
+ M freeze1  top1 0.8083
+ M freeze2  top1 0.8228
+ M freeze3  top1 0.7717
+ M freeze4  top1 0.7362
+ M freeze5  top1 0.3486
+ S freeze0  top1 0.7567
+ S freeze1  top1 0.7656
+ S freeze2  top1 0.7567
+ S freeze3  top1 0.6985
+ S freeze4  top1 0.6346
+ S freeze5  top1 0.2935
+XS freeze0  top1 0.5408
+XS freeze1  top1 0.5691
+XS freeze2  top1 0.5349
+XS freeze3  top1 0.4967
+XS freeze4  top1 0.3889
+XS freeze5  top1 0.1468
+saved results/evaluation.csv

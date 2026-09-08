@@ -1,0 +1,223 @@
+\label{sec:method}
+
+This model adopts the idea of extending 2D CNN models to 3D CNN models by considering temporal axis in the data.
+More precisely, \texttt{X3D} generalises the \textbf{compound model scaling} introduced in \cite{tan2019efficientnet} to more axes and starts scaling from a different baseline 2D model, which they called \texttt{X2D}.
+Moreover, they balance the computation and accuracy trade-offs by the proposal of forward expansion and backward contraction.
+Interestingly, \texttt{X3D} was first implemented in \texttt{PySlowFast} \cite{pyslowfast}, and enhanced for adaptability to mobile devices in \texttt{PyTorchVideo} \cite{fan2021pytorchvideo} thereafter.
+Next, we concretely introduce the \texttt{X2D} backbone and notations used.
+
+\subsection{X2D architecture}
+\label{sec:x2d}
+
+Briefly, \texttt{X2D} is inspired by the ResNet \cite{ResNet} architecture and the Fast pathway in SlowFast networks \cite{feichtenhofer2019slowfast}.
+Because \texttt{X2D} does not consist of temporal axis, hence its temporal stride is set to 1.
+In particular, the \textbf{Table \ref{tab:x3d_arch}} presents the conceptual design of \texttt{X2D} if and only if $\xgtau = \xgt = \xgs = \xgw = \xgb = \xgd = 1$.
+As reported, \texttt{X2D} has 20.67M FLOPS and 1.63M parameters.
+Interestingly, comparing to the SlowFast networks \cite{feichtenhofer2019slowfast}, \texttt{X2D} can be viewed as the Slow pathway in the SlowFast networks since it solely uses one single frame at once, while its width is much lighter and similar to the Fast pathway.
+
+Looking at \textbf{Table \ref{tab:x3d_arch}}, specifically at the output sizes column, across all stages, except the final stage, \texttt{X2D} preserves the same $\xgt$, i.e. the temporal input resolution, while reducing spatio resolution.
+Note that, the channel dimesion is omitted, and one may realise the resulting channel capacity by looking at the filters column.
+The preservation of temporal dimension resembles the SlowFast pathways \cite{feichtenhofer2019slowfast}, and thus, able to retain all temporal signals across features per stage.
+
+The difference between 2D and 3D CNNs are attribute to the number of dimensions of the kernel block, particularly, for 2D CNNs, the kernel is a matrix, whereas for 3D CNNs, the kernel is a 3D tensor.
+We shall denote the 3D kernel block with a spatialtemporal size of $T \times S^2$, where $T$ is the temporal length/duration and $S$ is the width and height, as square matrix is commonly used as kernel in 2D CNNs.
+
+
+
+\subsection{Expansion operations and mechanisms}
+\label{sec:expand_dim_and_method}
+
+To extend a tiny spatial network \texttt{X2D} to a spatialtemporal network \texttt{X3D}, \cite{feichtenhofer2020x3d} recommends six possible expansion operations, defined to scale four dimensions, i.e. temporal, spatial, width and depth as follows.
+
+\begin{itemize}
+    \item \textbf{X–Fast}: expands $\xgt$ by increasing the frame rate $1 / \xgtau$.
+    \item \textbf{X–Temporal}: expands $\xgt$ by increasing the frame rate $1 / \xgtau$ and sampling longer subclips.
+    \item \textbf{X–Spatial}: expands $\xgs$ by increasing the spatial sampling resolution of input frames.
+    \item \textbf{X–Depth}: expands $\xgd$ by increasing the number of layers per residual block $\text{res}_i$.
+    \item \textbf{X–Width}: expands $\xgw$ to uniformly increase the number of channels across all layers per residual block $\text{res}_i$.
+    \item \textbf{X–Bottleneck}: expands the inner channel width, $\xgb$, of first two layers in per residual block $\text{res}_i$.
+\end{itemize}
+
+These axes are illustrated in \textbf{Figure \ref{fig:x3d_expand}}.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[x=0.93cm, y=0.93cm, font=\small]
+
+        % ---------------- input frames ----------------
+        \foreach \i in {3,2,1,0}{
+            \shadedraw[line width=0.25pt, inner color=black!12, outer color=orange!60]
+                (\i*0.30,\i*0.46) rectangle (\i*0.30+3,\i*0.46+3);
+        }
+        \node at (2.4,4.75) {Input frames};
+
+        % gamma_s : spatial resolution (height and width)
+        \draw[dotted] (0,0) -- (-0.95,0);   \draw[dotted] (0,3) -- (-0.95,3);
+        \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, x3dblue, line width=0.8pt]
+            (-0.8,0) -- (-0.8,3);
+        \node[font=\large] at (-1.25,1.5) {$\xgs$};
+        \draw[dotted] (0,0) -- (0,-0.95);   \draw[dotted] (3,0) -- (3,-0.95);
+        \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, x3dblue, line width=0.8pt]
+            (0,-0.8) -- (3,-0.8);
+        \node[font=\large] at (1.5,-1.3) {$\xgs$};
+
+        % gamma_t : temporal duration (stacking direction)
+        \draw[dotted] (0,3) -- (-0.2,3.3);  \draw[dotted] (0.9,4.38) -- (0.7,4.68);
+        \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, x3dgreen, line width=0.8pt]
+            (-0.15,3.25) -- (0.75,4.63);
+        \node[font=\large] at (-0.65,4.1) {$\xgt$};
+
+        % gamma_tau : frame rate
+        \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, x3dgreen, line width=0.8pt]
+            (3.1,-0.05) -- (3.4,0.41);
+        \node[font=\large] at (3.8,0.05) {$\xgtau$};
+
+        % ---------------- stages ----------------
+        \draw[-{Stealth[length=2.5mm]}, line width=1.1pt] (4.4,1.5) -- (5.15,1.5);
+        \xstage{5.3}{0.2}{0.30}{2.6}{0.9}{0.10}
+        \node at (6.25,3.55) {res$_2$};
+
+        \draw[-{Stealth[length=2.5mm]}, line width=1.1pt] (7.15,1.5) -- (7.9,1.5);
+        \xstage{8.0}{0.4}{0.42}{2.2}{0.9}{0.10}
+        \node at (9,3.35) {res$_3$};
+
+        \draw[-{Stealth[length=2.5mm]}, line width=1.1pt] (10.2,1.5) -- (10.95,1.5);
+        \xstage{11.1}{0.7}{0.50}{1.6}{0.85}{0.10}
+        \node at (12.25,3.0) {res$_4$};
+
+        \draw[-{Stealth[length=2.5mm]}, line width=1.1pt] (13.5,1.5) -- (14.25,1.5);
+        \draw[fill=white] (14.4,0.2) rectangle (15,3);
+        \node[rotate=-90] at (14.73,1.6) {MLP classifier};
+
+        % gamma_b : bottleneck width (one slab of res_3)
+        \draw[dotted] (8.52,0.4) -- (8.52,0.1);  \draw[dotted] (8.94,0.4) -- (8.94,0.1);
+        \draw[{Stealth[length=1.6mm]}-{Stealth[length=1.6mm]}, x3dmagenta, line width=0.8pt]
+            (8.52,0.2) -- (8.94,0.2);
+        \node[font=\large] at (8.73,-0.3) {$\xgb$};
+
+        % gamma_w : width of the whole res_3 stage
+        \draw[dotted] (8.0,0.4) -- (8.0,-0.8);   \draw[dotted] (9.46,0.4) -- (9.46,-0.8);
+        \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, x3dviolet, line width=0.8pt]
+            (8.0,-0.7) -- (9.46,-0.7);
+        \node[font=\large] at (8.73,-1.2) {$\xgw$};
+
+        % gamma_d : depth (number of stages)
+        \draw[dotted] (5.3,3.35) -- (5.3,4.6);   \draw[dotted] (13.27,2.8) -- (13.27,4.6);
+        \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, x3dbrown, line width=0.8pt]
+            (5.3,4.5) -- (13.27,4.5);
+        \node[font=\large] at (9.3,5.05) {$\xgd$};
+
+        % axis legend
+        \draw[-{Stealth[length=1.6mm]}] (12.0,-1.15) -- (12.0,-0.4);
+        \node[font=\footnotesize] at (11.7,-0.25) {$H,W$};
+        \draw[-{Stealth[length=1.6mm]}] (12.0,-1.15) -- (12.6,-0.75);
+        \node[font=\footnotesize] at (12.8,-0.65) {$T$};
+        \draw[-{Stealth[length=1.6mm]}] (12.0,-1.15) -- (12.8,-1.15);
+        \node[font=\footnotesize] at (13.0,-1.2) {$C$};
+
+    \end{tikzpicture}
+    \caption{\textbf{X3D} networks progressively expand a 2D network across the following axes: temporal duration $\xgt$, frame rate $\xgtau$, spatial resolution $\xgs$, width $\xgw$, bottleneck width $\xgb$, and depth $\xgd$. Redrawn after \cite{feichtenhofer2020x3d}.}
+    \label{fig:x3d_expand}
+\end{figure}
+
+Having introduced possible scaling dimensions suggested in the paper, we show two key expansion regimes underpinning their discovery of network architectures.
+It is noteworthy that, there are different sizes of \texttt{X3D} depending how many times \texttt{X2D} is progressively scaled using the aforementioned expansion operations.
+Remarkably, the computation/accuracy trade–off is controlled by utilising a feature selection method, i.e. forward selection and backward elimination \cite{feat_select}.
+
+
+\paragraph{Forward expansion.} At each iteration, the algorithm loops through all possibilities by changing a factor in $\Gamma \triangleq \{\xgtau, \xgt, \xgs, \xgw, \xgb, \xgd\}$ and keeping others unchanged. Two important factors driving the choice of scaling dimensions are.
+First, the goodness criterion function $J(\Gamma)$, which is chosen to be the accuracy gained by expanding the current model by $\Gamma$, and thus, the higher the better.
+Second, computing resources are of paramount importance, and hence, deserved to be considered during the expansion.
+Let us denote $C(\Gamma)$ be a complexity criterion function, specifically FLOPs measurement in \cite{feichtenhofer2020x3d}.
+Ultimately, each iteration, the algorithm opts out the best balance between accuracy and complexity. Formally, $\Gamma = \operatorname*{\arg\max}\limits_{\mathcal Z, ~C(\mathcal Z) = c} J(\mathcal Z)$, where $\mathcal Z$ are possibilities of varying $\Gamma$ and $c$ is the target complexity budget.
+
+Remarkably, one may notice, there can be at most $2^6$ ways to change, each of which exhausts the computational capacity by varying $c \in \mathbb R$.
+Therefore, they rely on the idea of coordinate descent algorithms \cite{Wright2015CoordinateDA} and fixing the expansion rate at $c \approx 2$.
+In order to ensure this expansion rate, \cite{feichtenhofer2020x3d} provides details how much each scaling dimension can be expanded coordinate–wise.
+
+\paragraph{Backward contraction.} Simply speaking, this step is introduced to the algorithm to reduce $C(\mathcal Z)$ when its target complexity is surpassed in the prior forward expansion, so that $C(\mathcal Z) < c$ is guaranteed at each iteration.
+
+
+\subsection{X3D family}
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.4}
+    \setlength{\tabcolsep}{9pt}
+    \setlength{\arraycolsep}{10pt}
+    \begin{tabular}{c|c|c@{\hspace{7pt}}l}
+        \cline{1-3}
+        stage & filters & output sizes $T\times S^2$ & \\
+        \cline{1-3}\noalign{\vskip1.2pt}\cline{1-3}
+        data layer & stride $\xgtau,\ 1^2$ & $1\xgt\times(112\xgs)^2$ & \\
+        \cline{1-3}
+        conv$_1$ & $1\times3^2,\ 3\times1,\ 24\xgw$ & $1\xgt\times(56\xgs)^2$
+            & $\left.\rule[-8pt]{0pt}{16pt}\right\}$ \texttt{blocks[0]} \\
+        \cline{1-3}
+        res$_2$ & $\resblock{24}{}$ & $1\xgt\times(28\xgs)^2$
+            & $\left.\rule[-25pt]{0pt}{50pt}\right\}$ \texttt{blocks[1]} \\
+        \cline{1-3}
+        res$_3$ & $\resblock{48}{2}$ & $1\xgt\times(14\xgs)^2$
+            & $\left.\rule[-25pt]{0pt}{50pt}\right\}$ \texttt{blocks[2]} \\
+        \cline{1-3}
+        res$_4$ & $\resblock{96}{5}$ & $1\xgt\times(7\xgs)^2$
+            & $\left.\rule[-25pt]{0pt}{50pt}\right\}$ \texttt{blocks[3]} \\
+        \cline{1-3}
+        res$_5$ & $\resblock{192}{3}$ & $1\xgt\times(4\xgs)^2$
+            & $\left.\rule[-25pt]{0pt}{50pt}\right\}$ \texttt{blocks[4]} \\
+        \cline{1-3}
+        conv$_5$ & $1\times1^2,\ 192\xgb\xgw$ & $1\xgt\times(4\xgs)^2$
+            & \multirow{4}{*}{$\left.\rule[-34pt]{0pt}{68pt}\right\}$ \texttt{blocks[5]}} \\
+        pool$_5$ & $1\xgt\times(4\xgs)^2$ & $1\times1\times1$ & \\
+        fc$_1$ & $1\times1^2,\ 2048$ & $1\times1\times1$ & \\
+        fc$_2$ & $1\times1^2,\ \#\text{classes}$ & $1\times1\times1$ & \\
+        \cline{1-3}
+    \end{tabular}
+    \caption{\textbf{X3D architecture} \cite{feichtenhofer2020x3d}. The dimensions of kernels are denoted by $\{T\times S^2, C\}$ for temporal, spatial, and channel sizes. Strides are denoted as $\{$temporal stride, spatial stride$^2\}$. This network is expanded using factors $\{\xgtau, \xgt, \xgs, \xgw, \xgb, \xgd\}$ to form \texttt{X3D}. The braces on the right give the corresponding entry of the \texttt{blocks} module list of the \texttt{PyTorchVideo} implementation \cite{fan2021pytorchvideo}, i.e. the stem \texttt{blocks[0]}, the four residual stages \texttt{blocks[1]} to \texttt{blocks[4]}, and the head \texttt{blocks[5]}. The data layer is a sampling step so no trainable parameters required.}
+    \label{tab:x3d_arch}
+\end{table}
+
+% This grouping is the unit of adaptation used in \textbf{Section \ref{sec:experiment}}, where freezing $k$ blocks means holding \texttt{blocks[0]} to \texttt{blocks[$k-1$]} fixed, so that $k = 0$ trains the whole network and $k = 5$ trains the classifier head alone.
+Concretely, \texttt{X3D} is a feature extractor of a video. Conceptually, this can be represented using the following diagram:
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        font=\footnotesize,
+        box/.style={draw, rounded corners=2pt, align=center, minimum height=1.05cm, inner sep=4pt},
+        ar/.style={-{Stealth[length=2mm]}, line width=0.7pt}
+    ]
+        \node[box]                    (in)   {video clip\\[1pt]$T_0\times S^2 \times 3$};
+        \node[box, right=6mm of in]   (stem) {conv$_1$\\[1pt]$1\xgt\times(56\xgs)^2$};
+        \node[box, right=6mm of stem] (bb)   {res$_2\to$res$_5$\\[1pt]$1\xgt\times(4\xgs)^2$};
+        \node[box, right=6mm of bb]   (head) {conv$_5$, pool$_5$\\[1pt]$192\xgb\xgw$};
+        \node[box, right=6mm of head] (fc)   {fc$_1$, fc$_2$\\[1pt]$\#$classes};
+        \node[right=6mm of fc]        (out)  {prediction};
+
+        \foreach \a/\b in {in/stem, stem/bb, bb/head, head/fc, fc/out}{\draw[ar] (\a) -- (\b);}
+
+        \draw[dashed, rounded corners=3pt, black!55]
+            ($(in.north west)+(-3mm,6mm)$) rectangle ($(in.south east)+(3mm,-3mm)$);
+        \node[font=\scriptsize\itshape, black!55]
+            at ($(in.north)+(0,3.5mm)$) {input};
+
+        \draw[dashed, rounded corners=3pt, black!55]
+            ($(stem.north west)+(-3mm,6mm)$) rectangle ($(head.south east)+(3mm,-3mm)$);
+        \node[font=\scriptsize\itshape, black!55]
+            at ($(stem.north west)!0.5!(head.north east)+(0,3.5mm)$) {feature extractor $f_\theta$};
+
+        \draw[dashed, rounded corners=3pt, black!55]
+            ($(fc.north west)+(-3mm,6mm)$) rectangle ($(fc.south east)+(3mm,-3mm)$);
+        \node[font=\scriptsize\itshape, black!55] at ($(fc.north)+(0,3.5mm)$) {classifier};
+    \end{tikzpicture}
+    \caption{\texttt{X3D} as a video feature extractor followed by a linear classifier. The shape below each stage is its output size, following \textbf{Table \ref{tab:x3d_arch}}. In the input stage, $T_0$ is the total frames in the raw video input and $3$ implies each video's frame is in RGB color space.}
+    \label{fig:x3d_pipeline}
+\end{figure}
+
+The 2D CNN processes the whole image by learning local information stage by stage, untill the final blocks are sufficiently dense,
+and hence, a classfier, typically MLP, is used to yield final prediction.
+The 3D CNN generalises this concept by considering multiple frames at once, thereby allowing the model to understand the underlying temporal dependence inherently in video data, and keeps other aspects of 2D CNN as is.
+Put simply, both 2D and 3D CNNs are simply feature extractors, said differently, it learns to transform raw data into numerically meaningful vectors.
+
+Due to limited computing resources, we shall skip the expansion of \texttt{X2D} to \texttt{X3D}, and directly leverage different variants of \texttt{X3D} models, supported by \texttt{PyTorchVideo}, to conduct the experiments in the upcoming sections.
+

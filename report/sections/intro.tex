@@ -1,0 +1,33 @@
+\label{sec:introduction}
+
+Action Recognition is a dynamic and leading research area in Computer Vision, primarily developing efficient models to detect and understand human actions from video data \cite{HEO202632}.
+Its development is closely tied with several real-world applications.
+In medical environment, the number of patients usually outnumber the number of skilled staff.
+Therefore, medical robots are essentially important to reduce the workload, and thus, they must be smoothly integrated and capable of understanding the current states and work without explicit instructions from staff \cite{Stabenow2026}.
+Another application is early criminal activity recognition from surveilliance cameras in real-time manner \cite{LIM2023}, and other applications can be found in \cite{HEO202632, KongFu2022}.
+Due to their prevalence and significant impacts in real-world practices, various models have been proposed, e.g. X3D \cite{feichtenhofer2020x3d}, SlowFast \cite{feichtenhofer2019slowfast}, Two-streams CNN–based networks \cite{simonyan2014twostream}, and MViT \cite{fan2021mvit, li2022mvitv2}.
+
+Nonetheless, there are innegligable obstacles associated with Action Recognition applications, and the above-mentioned models cannot overcome all of these. As surveyed in \cite{HEO202632,KongFu2022}, one action is likely performed in various ways by different people,
+video quality is worsened in outdoor recordings, insufficient annotated data, some actions cannot be well-interpreted and many more.
+Importantly, Computer Vison applications are mostly deployed to edge devices whose computing capacities are limited while demanding low latency and real–time inference accuracy \cite{MoViNets, DeepRT}.
+Therefore, this report is interested in exploring a model, namely X3D \cite{feichtenhofer2020x3d}, originally implemented using \texttt{PyTorchVideo} \cite{fan2021pytorchvideo}, which offers competitive efficacy in terms of floating point operations (FLOPs) and parameters while maintaining relatively good accuracy, which is installable on edge devices.
+
+Within the realm of action recognition, sign language recognition is particularly intersting due to its practical significance.
+In daily life, hearing individuals communicate verbally both in–person and online, while deaf people communicate by use of different sign languages, involving plenty of facial expressions, hand and body gestures to express their thoughts.
+It has posed several difficulties to bridge the communication gap between deaf and hearing people, or even between deaf people using different system of sign languages, especially demanding as fast as we verbally communicate in foreign languages.
+This topic has been extensively studied, as surveyed in \cite{RASTGOO2021113794}. Similar to real–time speech recognition and translation, the community aims to develop models capable of recognising continuous sign language videos \cite{Improving-Continuous-Sign-Language-Recognition}.
+For sake of simplicity, we shall study isolated sign language recognition tasks \cite{Isolated-Sign-Language-Recognition}.
+
+In this work, we are curious about the capacity of pretrained \texttt{X3D}, provided by \texttt{PyTorchVideo}, can be fine–tuned to understand isolated sign language videos.
+Also, we are specifically interested in the performance gap between fine–tuning the whole model and partly on the sign language dataset.
+In brief, the contributions of this report are:
+
+\begin{itemize}
+    \item A technical summary of \texttt{X3D}.
+    \item Benchmark different fine-tuning approaches of \texttt{X3D} on \texttt{AUTSL} dataset \cite{sincan2020autsl}.
+    \item A quantitative result on performance of \texttt{X3D} on isolated sign language recognition tasks.
+    % \item Proposal of future work developed from this report.
+\end{itemize}
+
+The remainder of this report is structured as follows. In \textbf{Sec. \ref{sec:related_work}}, related models are reviewed. We concretely summarise the architecture and key contributions of X3D in \textbf{Sec. \ref{sec:method}}.
+The experimental setup is explicitly described in \textbf{Sec. \ref{sec:experiment}}. Finally, in \textbf{Sec. \ref{sec:conclusion}}, we convey certain remarking claims and discuss further on future developments of this work.

@@ -1,0 +1,168 @@
+\label{sec:experiment}
+
+\subsection{Datasets}
+In short, their motivation for creation of the \texttt{AUTSL} dataset is to replicate the real–world scenarios when using sign languages.
+The dataset contains frequently used vocabularies in spoken language, and keep the dataset balanced in terms of motion characteristics and time taken to complete a word.
+\textbf{Table \ref{tab:AUTSL_description}} below shows an overview of the dataset.
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}c c@{}}
+\toprule
+\textbf{Property} & \textbf{Description}  \\
+\midrule
+Number of signs & $226$  \\
+Number of signers & $43$ \\
+Total samples & $38,336$ \\
+Number of diﬀerent backgrounds &  $20$ \\
+Mean sample per sign & $169.6$ \\
+Modalities & RGB, depth, skeleton \\
+RGB and depth resolution & $512 \times 512$ \\
+FPS & 30 \\
+\bottomrule
+\end{tabular}
+\caption{Statistics of AUTSL dataset \cite{sincan2020autsl}.}
+\label{tab:AUTSL_description}
+\end{table}
+
+Regarding challenges, these videos were recorded in a wide variety of backgrounds, some are static while others are dynamic, meaning that, it may consist of moving objects behind the scenes.
+In addition, the authors intentionally selected signs that are very similar in motions, and very subtle gestures to distinguish them. Besides, they also included some compound signs, like in spoken language, these signs are made of more than two simple signs.
+Importantly, different signers may possess their own signatures while using sign languages, and thus, the authors asked people with different background to participate in the creation of this dataset.
+
+
+In this experiment, we leverage the available \texttt{AUTSL} dataset given in Kaggle, accessible via this link: https://www.kaggle.com/datasets/sttaseen/autsl.
+This dataset only comprises of RGB-colored videos, for a comprehensive dataset of \texttt{AUTSL}, including different video formats of the same data, refer to this link: https://cvml.ankara.edu.tr/datasets/.
+Therefore, by utilisation of Kaggle dataset, we limit ourselves to benchmark \texttt{X3D} performance on RGB–colored videos. Lastly, the downloaded data was already partitioned, and thus, we shall not split the dataset by our own.
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}c c c@{}}
+\toprule
+\textbf{Set} & \textbf{Number of samples} & \textbf{Percentage}  \\
+\midrule
+Train & $28,142$ & $77.5\%$ \\
+Validation & $4,418$ & $12.2\%$ \\
+Test & $3,742$ & $10.3\%$ \\
+\midrule
+Total & $36,302$ & 100\% \\
+\bottomrule
+\end{tabular}
+\caption{Number of samples inspected directly from the dataset.}
+\label{tab:AUTSL_samples}
+\end{table}
+
+Apparently, \textbf{Table \ref{tab:AUTSL_description}} and \textbf{Table \ref{tab:AUTSL_samples}} differ in the number of total samples, we suspect there are some data shifts between the Kaggle dataset and the original one.
+Therefore, we shall inspect again the statistics of the current dataset, mainly rely on the filenames.
+Noticeably, there exist some corrupted videos in the dataset, which are excluded from training and testing stages, details can be found in the implementation of this project.
+The figures shown below still inspect the whole dataset rather than dropping 11 corrupted videos (10 in train set and 1 in test set).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{figures/data_inspect_1.png}
+    \caption{Inspection of number of clips produced by each signer.}
+    \label{fig:data-inspect-1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/data_inspect_2.png}
+    \caption{Distribution of sign classes across the dataset splits. Every split covers all $226$ classes.
+    \textbf{All splits:} $36{,}302$ clips, with min $121$, median $162$, mean $160.6$ and max $164$ clips per class.
+    \textbf{train:} $28{,}142$ clips (min $90$, median $126$, mean $124.5$, max $127$)
+    \textbf{validation:} $4{,}418$ clips (min $12$, median $20$, mean $19.5$, max $20$)
+    \textbf{test:} $3{,}742$ clips (min $10$, median $17$, mean $16.6$, max $17$).}
+    \label{fig:data-inspect-2}
+\end{figure}
+
+\paragraph{Dataset building.} According to the models' sizes in \href{https://github.com/facebookresearch/pytorchvideo/blob/f3142bb05cdb56af0704ab6f0adfb0c7bbafe4a0/pytorchvideo/models/x3d.py#L539}{this code}.
+\begin{table}[H]
+    \centering\small
+    \begin{tabular}{@{}c c c@{}}
+    \toprule
+    \textbf{Model size} & \texttt{num\_frames} & \texttt{crop\_size}  \\
+    \midrule
+    \texttt{X3D\_XS} & $4$ & $160$  \\
+    \texttt{X3D\_S} & $13$ & $160$  \\
+    \texttt{X3D\_M} & $16$ & $224$  \\
+    \bottomrule
+    \end{tabular}
+    \caption{Number of frames and crop size for each video.}
+    \label{tab:model_sizes}
+\end{table}
+\texttt{AUTSL} dataset must be built with the matching \texttt{num\_frames} and \texttt{crop\_size}, otherwise the weights load but the model sees inputs it was never trained for.
+
+\subsection{Implementation details}
+% Describe the experimental environment
+
+
+In this experiment, we do not benchmark the model against other methods. Alternatively, we benchmark different fine-tuning approaches of different models' sizes.
+
+In the original codebase, \texttt{X3D} was pretrained on \texttt{Kinetics--400} dataset \cite{kay2017kinetics}, and thus the final \texttt{softmax} layer does not match the number of classes in \texttt{AUTSL} dataset.
+Therefore, we replace the final linear projection layer, to reduce the number of classes.
+Formally, let $g(\mathbf x)$ is the final fully connected layer of pretrained \texttt{X3D}, given by:
+\begin{align}
+    g: \mathbb R^{k} \mapsto \mathbb R^{400}
+\end{align}
+We shall replace it by:
+\begin{align}
+    g: \mathbb R^k \mapsto \mathbb R^{226}
+\end{align}
+
+The remaining settings are as follows.
+\begin{itemize}[topsep=2pt, itemsep=2pt]
+    \item \textbf{Data.} The \texttt{AUTSL} train split, i.e. $28{,}142 - 10 = 28{,}132$ clips over $226$ classes, unless a subset is configured.
+    \item \textbf{Preprocessing.} Uniform temporal subsampling to the variant's clip length, resizing to its crop size, random horizontal flip, scaling to $[0,1]$ and per--channel normalisation with mean $0.45$ and standard deviation $0.225$.
+    \item \textbf{Initialisation.} \texttt{Kinetics--400} weights for the backbone, and a freshly initialised linear head.
+    \item \textbf{Optimisation.} Cross--entropy loss with \texttt{Adam}. About fine–tuning different components, frozen blocks are excluded from the optimiser and held in evaluation mode, so that their \texttt{BatchNorm} running statistics do not drift.
+    \item \textbf{Hyperparameters.} Epochs = 100, batch size = 16 and learning rate = $10^{-4}$.
+    \item \textbf{Hardware.} AMD EPYC 7402P (24 cores - 48 threads), 256 GB DDR4 RAM and 4x NVIDIA A100 (40GB HBM2 each).
+\end{itemize}
+
+
+
+
+\subsection{Evaluation metrics}
+\label{sec:metrics}
+
+Since \texttt{X3D} is designed around an accuracy–complexity trade-off rather than accuracy alone \cite{feichtenhofer2020x3d}, we report metrics along two axes, i.e. how well a model recognises signs, and how expensive it is to store and to evaluate.
+% Reporting only the former would conceal exactly the property that motivates this family of networks \cite{tan2019efficientnet, MoViNets}.
+
+\paragraph{Top–$k$ accuracy.}
+Let the test split be $\mathcal D = \{(\mathbf V_i, y_i)\}_{i=1}^{N}$, where $\mathbf V_i$ is a clip and $y_i \in \{1, \ldots, C\}$ is its sign label, $C = 226$ being the number of classes.
+For each clip the network, i.e. the final \texttt{softmax} layer, produces a score vector $\mathbf z_i = (z_{i1}, \ldots, z_{iC}) \in \mathbb R^C$, and we write $\mathcal R_k(\mathbf V_i) \subseteq \{1, \ldots, C\}$ to denote the subset of $k \le C$ classes receiving the largest scores.
+The top–$k$ accuracy:
+\begin{align}
+    \text{top--}k = \frac{1}{N} \sum_{i=1}^{N} \mathbf 1 \left\{ y_i \in \mathcal R_k(\mathbf V_i) \right\},
+\end{align}
+where $\mathbf 1\{\cdot\}$ denotes the indicator function.
+% As the \texttt{softmax} map is strictly increasing, it preserves the ordering of $\mathbf z_i$, and hence $\mathcal R_k$ may equivalently be taken over logits.
+
+We evaluate $k \in \{1, 3, 5\}$.
+Since $\mathcal R_1 \subseteq \mathcal R_3 \subseteq \mathcal R_5$, these satisfy $\text{Top--}1 \le \text{Top--}3 \le \text{Top--}5$.
+Top–1 is the strict accuracy, i.e. the fraction of clips whose most probable class is correct, and is the quantity of practical interest for a recognition system.
+Top–5 is the conventional companion metric on \texttt{Kinetics–400} \cite{kay2017kinetics} and \texttt{ImageNet} \cite{Russakovsky2015}.
+Top–3 is included to give balance between strict metric top–1 and easy metric top–5.
+The margin between Top–1 and Top–3 therefore diagnoses the nature of the residual errors, i.e. a small margin indicates genuine failures, whereas a large one indicates near misses within a small group of mutually confusable signs.
+
+\paragraph{Total and trainable parameters.}
+Let $\theta$ be the full set of parameters of a model and $\theta_{\text{tr}} \subseteq \theta$ the subset left unfrozen during optimisation.
+We report the cardinalities $|\theta|$ and $|\theta_{\text{tr}}|$.
+Because our experiments compare fine–tuning strategies rather than competing architectures, this pair separates two costs that a single count would conflate.
+$|\theta|$ governs the memory required to store and deploy the network, whereas $|\theta_{\text{tr}}|$ governs the gradients and optimiser state held during training, and thus the cost of adaptation.
+% A frozen backbone with a retrained head leaves $|\theta|$ essentially unchanged while making $\rho \ll 1$; full fine--tuning gives $\rho = 1$.
+
+\paragraph{GFLOPs.}
+We quantify inference cost by the number of floating–point operations required for one forward pass, expressed in units of $10^9$.
+Following the convention adopted in \cite{feichtenhofer2020x3d, tan2019efficientnet}, we count multiply--adds and quote the cost of a \textit{single} clip.
+% a test--time protocol that averages predictions over several temporal clips and spatial crops multiplies this figure by the number of views.
+% Two remarks are in order.
+% First, unlike the image setting, the cost of a video network depends on the shape $T \times S^2$ of the sampled clip, so this shape must be fixed before the figures of different variants may be compared.
+Importantly, GFLOPs is an analytic quantity, independent of hardware, and is therefore a fair proxy for arithmetic effort but not for wall--clock latency.
+% as \cite{MoViNets} observes, peak memory consumption may dominate the practical cost of a video model on constrained devices.
+
+
+
+
+
+\subsection{Main results}
+\input{sections/results.tex}

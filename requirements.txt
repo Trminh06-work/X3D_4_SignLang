@@ -1,0 +1,17 @@
+torch==2.13.0
+
+# Memory-maps the decoded clip cache
+numpy==2.4.6
+torchvision==0.28.0
+matplotlib==3.11.1
+ipykernel==7.3.0
+
+# X3D architectures. Do not import pytorchvideo.transforms: the released
+# build imports torchvision.transforms.functional_tensor, gone since 0.17
+pytorchvideo==0.1.5
+
+# Decodes the AUTSL mp4 clips
+av==18.1.0
+
+# FLOP counting
+fvcore==0.1.5.post20221221

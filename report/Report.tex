@@ -1,0 +1,226 @@
+%=========================================================
+% Mathematics Report Template - HD Standard
+%=========================================================
+\documentclass[11pt,a4paper]{article}
+
+%---------------- Packages ----------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{multicol}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{angles,quotes} % for angle marks
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage[skip=0.6\baselineskip, indent=0pt]{parskip} % no paragraph indent, vertical gap instead
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+% optional: make comments right-aligned with a pointer
+\algrenewcommand\algorithmiccomment[1]{\hfill$\triangleright$~#1}
+
+\usepackage{amsmath, amssymb, amsthm, mathtools} % math environments
+\usepackage{mathrsfs}
+\usepackage{bm}             % bold math symbols
+\usepackage{physics}        % derivatives, bra-ket, etc.
+\usepackage{enumitem}       % custom lists
+\usepackage{tikz}           % diagrams
+\usepackage{pgfplots}       % plots
+\pgfplotsset{compat=1.18}
+\usepackage{graphicx}       % figures
+\usepackage{subcaption}     % subfigures
+\usepackage{xcolor}         % colors
+\usepackage{hyperref}       % hyperlinks
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=blue, urlcolor=blue}
+
+%---------------- Theorem Environments ----------------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+
+% ---- colours and shorthands for the expansion factors ----
+\definecolor{x3dgreen}{RGB}{0,150,90}
+\definecolor{x3dblue}{RGB}{60,60,205}
+\definecolor{x3dviolet}{RGB}{140,60,200}
+\definecolor{x3dmagenta}{RGB}{190,20,140}
+\definecolor{x3dbrown}{RGB}{150,60,10}
+\newcommand{\xgtau}{\textcolor{x3dgreen}{\bm{\gamma_\tau}}}
+\newcommand{\xgt}{\textcolor{x3dgreen}{\bm{\gamma_t}}}
+\newcommand{\xgs}{\textcolor{x3dblue}{\bm{\gamma_s}}}
+\newcommand{\xgw}{\textcolor{x3dviolet}{\bm{\gamma_w}}}
+\newcommand{\xgb}{\textcolor{x3dmagenta}{\bm{\gamma_b}}}
+\newcommand{\xgd}{\textcolor{x3dbrown}{\bm{\gamma_d}}}
+% one shaded cuboid: #1 x, #2 y, #3 width (C), #4 height (H,W), #5 depth (T)
+\newcommand{\xslab}[5]{%
+    \pgfmathsetmacro{\slabdx}{0.55*#5}%
+    \pgfmathsetmacro{\slabdy}{0.42*#5}%
+    \shadedraw[line width=0.25pt, left color=orange!45, right color=black!40]
+        (#1,#2+#4) -- (#1+#3,#2+#4) -- (#1+#3+\slabdx,#2+#4+\slabdy) -- (#1+\slabdx,#2+#4+\slabdy) -- cycle;
+    \shadedraw[line width=0.25pt, top color=black!45, bottom color=orange!35]
+        (#1+#3,#2) -- (#1+#3,#2+#4) -- (#1+#3+\slabdx,#2+#4+\slabdy) -- (#1+#3+\slabdx,#2+\slabdy) -- cycle;
+    \shadedraw[line width=0.25pt, inner color=black!22, outer color=orange!45]
+        (#1,#2) rectangle (#1+#3,#2+#4);
+}
+% a res stage: three slabs side by side. #1 x, #2 y, #3 slab width, #4 height, #5 depth, #6 gap
+\newcommand{\xstage}[6]{%
+    \foreach \i in {0,1,2}{%
+        \pgfmathsetmacro{\stagex}{#1+\i*(#3+#6)}%
+        \xslab{\stagex}{#2}{#3}{#4}{#5}%
+    }%
+}
+\newcommand{\resblock}[2]{%
+    \left[\begin{array}{c}
+        1\times1^2,\ #1\xgb\xgw \\
+        3\times3^2,\ #1\xgb\xgw \\
+        1\times1^2,\ #1\xgw
+    \end{array}\right]\times#2\xgd
+}
+
+
+%---------------- Title Page ----------------
+\title{\textbf{Technical Report  \\ Towards Video Understanding: Action Recognition by PyTorchVideo}\\[6pt]
+       \large {SIT332 – Robotics, Computer Vision and Speech Processing}}
+\author{Student Name: Bao Minh Tran \\
+ Student ID: s224236373 \\
+  Deakin University}
+\date{September $12^{th}$, 2025}
+
+%=========================================================
+\begin{document}
+
+%=========================================================
+% Cover Page
+%=========================================================
+\input{sections/cover_page.tex}
+
+\begin{abstract}
+    \noindent
+    Action recognition models are increasingly deployed on devices whose compute budget is far smaller than the one they were designed on. 
+    \texttt{X3D} \cite{feichtenhofer2020x3d} addresses this by expanding a small 2D architecture one axis at a time, trading accuracy against cost explicitly. 
+    This report summarises \texttt{X3D} and its realisation in \texttt{PyTorchVideo} \cite{fan2021pytorchvideo}, then asks how well its \texttt{Kinetics--400} representation transfers to isolated sign language recognition. 
+    We fine–tune three \texttt{Kinetics–400}–pretrained variants on the \texttt{AUTSL} dataset \cite{sincan2020autsl} of $226$ Turkish signs, at sixtwo depths, increasingly freeze from 0 block, i.e. the whole network to 5 blocks, i.e. only classifier head is trained.
+    \textcolor{red}{State the headline top--1 for the best configuration, the gap between the two fine--tuning depths, and the cost in GFLOPs at which it was obtained.} \textcolor{red}{Close with the one sentence a reader should take away about the accuracy--cost trade--off on this task.}
+\end{abstract}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+%=========================================================
+\section{Introduction}
+\input{sections/intro.tex}
+
+%=========================================================
+
+
+
+%=========================================================
+\newpage
+\section{Related work}
+\input{sections/related_work.tex}
+
+%=========================================================
+
+
+%=========================================================
+\newpage
+\section{X3D: A technical summary}
+\input{sections/method.tex}
+
+%=========================================================
+
+
+%=========================================================
+\newpage
+\section{Experiments}
+\input{sections/exp.tex}
+%=========================================================
+
+
+%=========================================================
+\newpage
+\section{Conclusion and discussion}
+\input{sections/conclusion.tex}
+
+%=========================================================
+
+
+\newpage
+\bibliographystyle{splncs04} % or another style like plain, apa, etc.
+\bibliography{literature}
+% \nocite{*}
+
+%=========================================================
+% \appendix
+% \newpage
+% \section*{Appendices}
+% \addcontentsline{toc}{section}{Appendices}
+
+% \section{Notations and Terminology}
+% {\renewcommand{\arraystretch}{1.3}
+% \section*{Acronyms}
+% \begin{tabularx}{\textwidth}{lX}
+% \hline
+% \textbf{Acronyms} & \textbf{Meaning} \\
+% \hline
+% DE & Differential Equation \\
+% ODE & Ordinary Differential Equation \\
+% PDE & Partial Differential Equation \\
+% IVP & Initial Value Problem \\
+% BVP & Boundary Value Problem \\
+% PC & Piecewise Continuous \\
+% w.r.t & with respect to \\
+% i.e. & that is \\
+% e.g. & example \\
+% iff & if and only if \\
+% JCF & Jordan Canonical Form\\
+% IBP & Integration By Parts\\
+% FT & Fourier Transform\\
+% DFT & Discrete Fourier Transform\\
+% FFT & Fast Fourier Transform\\
+% \hline
+% \end{tabularx}}
+
+% {\renewcommand{\arraystretch}{1.7}
+% \section*{Notation}
+
+% \begin{tabularx}{\textwidth}{lX}
+% \hline
+% \textbf{Symbol} & \textbf{Meaning} \\
+% \hline
+% $\mathbb{R}$ & Set of real numbers \\
+% $\mathbb{C}$ & Set of complex numbers \\
+% $\mathbb Z_{\ge 0}$ & Set of non–negative integers \\
+% $\mathbf x$ & vectors (in general) \\
+% $i = \overline{a, b}$ & $i = a, a+1, \ldots, b$ \\
+% $F(\mathbf x, f, \nabla f, \nabla^2 f, \ldots)$ & a set of functions that are added together \\
+% $f^{(n)} \equiv \dfrac{d^nf}{dx^n}$ & The $n^{th}$ derivative of $f$ \\[1em]
+% $\dfrac{\partial f}{\partial x} \equiv f_x$ & The $1^{st}$–order partial derivative of $f$ w.r.t independent variable $x$\\[1em]
+% $\nabla f$ & The ($1^{st}$–order) gradient of $f$ \\
+% $D^nf \equiv \nabla^n f$ & The $n^{th}$–order gradient of $f$ \\
+% $D^\alpha f$ & The multi–index $\alpha$ of $f$\\
+% $H(f)(\mathbf x)$ & The Hessian Matrix of $f$ \\
+% $D_{\mathbf u}f(\mathbf x)$ & The directional derivative of $f$ in the direction of $\mathbf u$\\
+% $J\mathbf f$ & The Jacobi matrix of $\mathbf f$\\
+% $\lambda_i$ & the $i^{th}$ eigenvalue \\
+% $\overrightarrow{\lambda_{ij}}$ & the $j^{th}$ (generalized) eigenvector of the $i^{th}$ eigenvalue \\
+% $\mathscr O(\cdot)$ & the time complexity of $(\cdot)$ \\
+% $V_n$ & the Vandermonde matrix \\
+% \hline
+% \end{tabularx}}
+
+
+\end{document}

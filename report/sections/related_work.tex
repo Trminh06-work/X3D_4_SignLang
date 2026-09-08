@@ -1,0 +1,29 @@
+\label{sec:related_work}
+
+A comprehensive survey of proposed methods for different action recognition tasks can be found in \cite{HEO202632, KongFu2022} and a nicely concise history of development is included in \cite{shuchang2022surveyhumanactionrecognition}.
+Hence, we shall confine ourselves to some recent relevant models herein.
+
+\paragraph{SlowFast Networks \cite{feichtenhofer2019slowfast}.}
+This network adopts the Two–stream CNN–based framework \cite{simonyan2014twostream} for incorporation between spatial and temporal semantics of video data.
+It was originally inspired by the biological studies in primate visual system, and prematurely mimicking the mechanisms of Parvocellular and Magnocellular to develop the Slow-Fast pathways and lateral connections between them.
+Evidently, different variants achieved, on Kinetic–400 \cite{kay2017kinetics}: 75.6\% to 79.8\% top–1 accuracy, 92.1\% to 93.9\% top–5 accuracy, on Kinetic–600 \cite{carreira2018shortnotekinetics600}: 78.8\% to 81.8\%, and on Charades \cite{Charades}: 39.0 to 45.2 mAP.
+
+\paragraph{EfficientNet \cite{tan2019efficientnet}.} This model relies on the scalability philosophy of DL models, e.g. Residual Networks \cite{ResNet}, and platform–aware search of network architecture \cite{MnasNet}.
+Then, by scaling the ConvNets wisely across three dimensions, i.e. depth, width and resolution. Different model variants achieved, on ImageNet dataset \cite{Russakovsky2015}, 77.1\% to 84.3\% top–1 accuracy and 93.3\% to 97.0\% top–5 accuracy, with fewer learnable parameters, from 5.3M to 66M.
+The \textbf{X3D} model was built upon the philosophy in this network type, but offers more computational advantages.
+
+\paragraph{MViT \cite{fan2021mvit,li2022mvitv2}.} This model was established by leveraging the \textit{multiscale feature hierarchies} in CNN–based models and the \textit{attention} mechansim in Transformer–based models.
+By doing this, the model can establish a pyramid of features similar to CNN while globalising the interactions amongst the local regions thanks to self–attention.
+Therefore, it reduces the locality bias in CNN–based models and simultaneously breaking the permutation invariance in ViT \cite{ViT}, which is semantically wrong in the context of video understanding where temporal relationship must be considered.
+As a result, it gained, on Kinetic–400 \cite{kay2017kinetics}, 76.0\% to 81.2\% top–1 accuracy and 92.1\% to 95.1\% top–5 accuracy, on Kinetic–600 \cite{carreira2018shortnotekinetics600}, 82.1\% to 83.8\% top–1 accuracy and 95.7\% to 96.3\% top–5 accuracy,
+and on Charades \cite{Charades}, 43.9 to 47.7 mAP.
+
+\paragraph{MoViNets \cite{MoViNets}.} This model substantially reduces the peak memory usage and computational budget while performing competitively in the benchmark datasets above.
+The authors utilise the neural architecture search to determine a good construction of 3D CNN architectures. Then, they introduce stream buffer component to simultaneously reduce memory consumption and maintain long-range temporal dependencies of sub–clips.
+Still, it loses some accuracy, by roughly 1\% in Kinetic-600 \cite{carreira2018shortnotekinetics600}. Thus, they recover the accuracy loss by leveraging the ensembling philosophy \cite{kondratyuk2020ensembling}, specifically, they train two model variants independently and combine them by taking the arithmetic mean on the unweighted logits before their final softmax layer.
+
+Indeed, some models, in the family of MoViNets, are better, in terms of GFLOPs and top-1 accuracy, than certain variants of X3D, as reported in Appendix C of \cite{MoViNets}.
+Nonetheless, it was originally implemented in TensorFlow, not PyTorchVideo, though there is an incomplete unofficial implementation, can be found in \href{https://github.com/Atze00/MoViNet-pytorch.git}{\texttt{this link}}.
+We shall confine ourselves to \textbf{X3D} due to its complete availability and technical ease.
+
+
