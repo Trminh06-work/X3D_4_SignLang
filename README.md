@@ -33,8 +33,7 @@ conda create -n videoCV python=3.11 && conda activate videoCV
 pip install -r requirements.txt
 ```
 
-The clips are not in this repository. Download the RGB-only AUTSL release from
-[Kaggle](https://www.kaggle.com/datasets/sttaseen/autsl) and unpack it.
+The clips are not in this repository. Download the RGB-only AUTSL release from [Kaggle](https://www.kaggle.com/datasets/baominhtran06/sit332-autsl4x3d) and unzip it manually.
 
 ## Running
 

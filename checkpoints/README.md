@@ -23,9 +23,8 @@ Every run also writes its training curve to `figures/<same name>.png`, showing p
 | XS | 4 frames | 160 px |
 | S | 13 frames | 160 px |
 | M | 16 frames | 224 px |
-| L | 16 frames | 312 px |
 
-XS, S and M are the same architecture and differ only in the input clip they were pretrained on; L is deeper. A checkpoint is therefore only meaningful together with its clip geometry, hence `AUTSLDataset` must be built with the matching `num_frames` and `crop_size`, otherwise the weights load but the model sees inputs it was never trained for.
+XS, S and M are the same architecture and differ only in the input clip they were pretrained on. A checkpoint is therefore only meaningful together with its clip geometry, hence `AUTSLDataset` must be built with the matching `num_frames` and `crop_size`, otherwise the weights load but the model sees inputs it was never trained for.
 
 <!-- ## Runs configured in `script/train.conf`
 
