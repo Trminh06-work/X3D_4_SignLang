@@ -1,7 +1,6 @@
 # X3D on AUTSL
 
-Fine-tuning [X3D](https://arxiv.org/abs/2004.04730) video networks for isolated sign language recognition on [AUTSL](https://cvml.ankara.edu.tr/datasets/), a
-226-class Turkish Sign Language dataset.
+Fine-tuning [X3D](https://arxiv.org/abs/2004.04730) video networks for isolated sign language recognition on [AUTSL](https://www.kaggle.com/datasets/baominhtran06/sit332-autsl4x3d), a 226-class Turkish Sign Language dataset.
 
 We answer two questions in this repo:
 
