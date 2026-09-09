@@ -78,33 +78,26 @@ $4$ & $92.4$ & $49.2$ & $97.7$ & $71.1$ & $97.8$ & $77.1$ \\
 $5$ & $48.0$ & $19.9$ & $64.3$ & $36.5$ & $69.8$ & $38.5$ \\
 \bottomrule
 \end{tabular}
-\caption{Top--1 accuracy (\%) on the train and validation splits, for each variant and freezing depth. Both figures are read at the epoch of peak validation accuracy within the $100$--epoch budget, so that each pair describes a single model state and their difference is the generalisation gap of that state. The variants differ only in the clip they sample, i.e. \texttt{X3D\_XS} takes $4$ frames at $160^2$, \texttt{X3D\_S} $13$ frames at $160^2$ and \texttt{X3D\_M} $16$ frames at $224^2$. The best validation entry per variant is bolded.}
+\caption{Top--1 accuracy (\%) on the train and validation splits, for each variant and freezing depth. The variants differ only in the clip they sample, i.e. \texttt{X3D\_XS} takes $4$ frames at $160^2$, \texttt{X3D\_S} $13$ frames at $160^2$ and \texttt{X3D\_M} $16$ frames at $224^2$. The best validation entry per variant is bolded.}
 \label{tab:val_sweep}
 \end{table}
 
+\paragraph{Underfitting.} Training the classifier head only amount to underfitting, evidently $48.0\%$, $64.3\%$ and $69.8\%$ accuracy for \texttt{X3D\_XS}, \texttt{X3D\_S} and \texttt{X3D\_M}, respectively.
+This is indicative of the \texttt{Kinetics–400} pretrained weights may not contribute vastly to models' performance on \texttt{AUTSL}, and mostly rely on the learning capacity of the classifier block.
 
-\paragraph{Underfitting and overfitting.} The two failure modes occur at opposite ends of the sweep, and \textbf{Table \ref{tab:val_sweep}} separates them.
-Training the classifier head alone underfits: those runs reach only $48.0\%$, $64.3\%$ and $69.8\%$ accuracy on the split they are trained on, for \texttt{X3D\_XS}, \texttt{X3D\_S} and \texttt{X3D\_M} respectively, whereas every run with at least one block unfrozen exceeds $92\%$.
-A model that cannot fit half of its own training data is not overfitting, and the limitation is therefore representational rather than statistical, i.e. frozen \texttt{Kinetics--400} features are not separable into $226$ signs by a linear map.
-This is not a matter of head capacity either, since the head still holds $1.43$M of the $3.44$M parameters, as reported in \textbf{Table \ref{tab:main_results}}.
-Overfitting instead appears once the backbone is adapted, as a wide but stable gap between the two columns, e.g. $31.5$ points for \texttt{X3D\_XS} and $13.0$ points for \texttt{X3D\_M} with no block frozen.
-The gap widens with freezing depth, reaching $43.2$ points for \texttt{X3D\_XS} at four frozen blocks, as the trainable remainder memorises the training split without gaining anything transferable.
+\paragraph{Pretrained weights may not help.} Looking at learning curves in \textbf{Figure \ref{fig:curves}}, at the first few epochs, they accuracy is extremely low.
+Semantically, this is true, since \texttt{Kinetics–400} and \texttt{AUTSL} are constructed for two completely different tasks. Nonetheless, we cannot strongly claim that this does not help, since the pretrained weights may yield a relatively good initial starting point to optimise the models, in terms of local optimality and convergence speed.
+Further ablation studies must be conducted to compare between train–from–scratch vs. train–from–pretrained.
 
-% \paragraph{Shallow freezing is free.} Holding the first two blocks fixed costs nothing measurable: across the three variants, freezing $0$, $1$ or $2$ blocks stays within one point of accuracy, and in two cases out of three the best run is not the fully fine--tuned one, i.e. $86.1\%$ at two frozen blocks for \texttt{X3D\_M} against $85.4\%$ at none.
-% Accuracy only begins to fall from three blocks onwards, and does so sharply thereafter.
-% The early stages of the \texttt{Kinetics--400} backbone therefore transfer to sign language unchanged, and the adaptation that matters is concentrated in the last two or three stages.
-
-% \paragraph{The head alone underfits.} The head--only runs do not merely generalise poorly, they fail to fit the training split at all, reaching a final training accuracy of $48.7\%$, $65.3\%$ and $70.2\%$ for \texttt{X3D\_XS}, \texttt{X3D\_S} and \texttt{X3D\_M} respectively, against above $95\%$ for every run with at least one block unfrozen.
-% This is visible in the left column of \textbf{Figure \ref{fig:curves}}, where both curves plateau together rather than diverging.
-% The limitation is thus one of representation and not of data: a linear classifier over frozen \texttt{Kinetics} features cannot separate $226$ signs, which is unsurprising given that the pretraining classes are coarse everyday actions whereas the signs here differ by subtle handshape and movement.
+\paragraph{Overfitting.} Interestingly, enabling more blocks in the backbone model trainable flips the situation. It immediately overfits to the training data for the first block adjacent to the classifier head, evidently by the huge gap between train and validation accuracy.
+Nevertheless, the gap is converging as we allows more parameters learnable, and astonishingly, such train–validation gap is narrower in \texttt{X3D\_M} than in \texttt{X3D\_XS}.
 
 \paragraph{Clip sampling outweighs adaptation depth.} The ordering $\texttt{X3D\_M} > \texttt{X3D\_S} > \texttt{X3D\_XS}$ holds at every freezing depth, and the margin is large.
-More specifically, \texttt{X3D\_M} with three blocks frozen ($83.4\%$) still exceeds fully fine--tuned \texttt{X3D\_S} ($81.5\%$), which in turn exceeds \texttt{X3D\_XS} by some seventeen points.
-It is worth noting that the three variants share one architecture and one parameter count, as \textbf{Table \ref{tab:main_results}} confirms, and differ only in the clip drawn from each video.
-The gain is thus attributable to temporal and spatial sampling rather than to capacity, and it is bought with computation at inference, i.e. $0.63$, $2.03$ and $4.90$ GFLOPs per clip.
-The four--frame clip of \texttt{X3D\_XS} is the more plausible culprit, since a sign is a trajectory and four samples over roughly two seconds discard most of it.
+More specifically, on validation accuracy, \texttt{X3D\_M} with three blocks frozen ($83.4\%$), fully fine–tuned ``best'' \texttt{X3D\_S} ($81.5\%$), and one block frozen ``best'' \texttt{X3D\_XS} ($64.7\%$).
+From \textbf{Table \ref{tab:main_results}}, three variants differ only in the clip drawn from each video and the cropping size each frame.
+Therefore, the gain is attribute to temporal and spatial sampling rather than to capacity, and it is traded off with GFLOPs.
 
-\paragraph{Recommendation.} From the above–mentioned results and analysis, we shall pick \texttt{X3D\_M} with 2 frozen blocks as our ``best'' model, due to its performance competency.
+\paragraph{Recommendation.} From the above–mentioned results and analysis, we shall pick \texttt{X3D\_M} with 2 frozen blocks as our ``best'' model, due to its performance competency and good trade–off with trainable parameters.
 
 \subsubsection{Final evaluation on test set}
 
@@ -137,7 +130,7 @@ The four--frame clip of \texttt{X3D\_XS} is the more plausible culprit, since a 
 \texttt{X3D\_M} & $5$ & $34.86$ & $50.98$ & $57.31$ & $3.438$ & $1.432$ & $4.90$ \\
 \bottomrule
 \end{tabular}
-\caption{Performance on the \texttt{AUTSL} test split ($3{,}741$ clips evaluated over $226$ classes). Frozen counts how many of the network's six blocks were held fixed, following \textbf{Table \ref{tab:x3d_arch}}, so that $5$ trains the classifier head alone and $0$ trains the whole network. Accuracies are defined in \textbf{Sec. \ref{sec:metrics}} and GFLOPs are quoted per single clip. The three variants share one architecture and therefore one parameter count; they differ only in the clip sampled from the video, which is what the GFLOPs column reflects. The best top--1 per variant is bolded.}
+\caption{Performance on the \texttt{AUTSL} test split ($3{,}741$ clips evaluated over $226$ classes). The best top–1 per variant is bolded.}
 \label{tab:main_results}
 \end{table}
 
@@ -149,7 +142,7 @@ Thereafter, unfreezing other blocks gain more accuracy, though not a big jump as
 The longer clip is therefore not wasted on isolated signs, but its value saturates.
 
 \paragraph{Error type.} The top--1 to top--3 margin is widest for \texttt{X3D\_XS} and narrowest for \texttt{X3D\_M}.
-We shall claim, though insignificantly different, that the small variant's errors are largely near misses among confusable signs, whereas the residual errors of \texttt{X3D\_M} are more often outright failures.
+We shall claim, though insignificantly, that the small variant's errors are largely near misses among confusable signs, whereas the residual errors of \texttt{X3D\_M} are more often outright failures.
 
 \subsubsection{Generalising to our data}
 

@@ -3,16 +3,22 @@
 \paragraph{Conclusion.}
 This report summarised \texttt{X3D} \cite{feichtenhofer2020x3d}, the family of video networks obtained by expanding a small 2D architecture one axis at a time, and examined how its \texttt{PyTorchVideo} implementation \cite{fan2021pytorchvideo} transfers to isolated sign language recognition on \texttt{AUTSL} \cite{sincan2020autsl}.
 Our best configuration, \texttt{X3D\_M} with two frozen blocks, reaches $82.28\%$ top--1, $94.49\%$ top--3 and $96.52\%$ top--5 on the \texttt{AUTSL} test split, at $4.90$ GFLOPs per clip and $3.42$M trainable parameters.
-On the first question, full fine--tuning is worth between $39.4$ and $47.5$ top--1 points over a retrained head, but the gain is unevenly distributed: unfreezing one further block recovers most of it, and freezing the first one or two blocks costs nothing.
-On the second, the larger variant repays its cost only in part.
-The step from \texttt{X3D\_XS} to \texttt{X3D\_S} returns $19.7$ points for $3.2\times$ the GFLOPs, whereas the step to \texttt{X3D\_M} returns $5.8$ for a further $2.4\times$.
-Since all three variants share one parameter count, this is the price of sampling a longer clip rather than of a larger model.
+Importantly, the emprical results highlight that, it is unnecessary to retrain the whole backbone model.
+
+Regarding fine–tuning approaches, considering each model size (\texttt{XS, S, M}), on test accuracy, full fine–tuning is worth between $39.4$ and $47.5$ top–1 points over training only classifier head, but the gain is unevenly distributed.
+Unfreezing one further block substantially improves model's prediction accuracy, and freezing the first one or two blocks costs nothing.
+
+Regarding model sizes, considering each fine–tuning strategy, the larger variant repays its cost only in part.
+On test accuracy, from \texttt{X3D\_XS} to \texttt{X3D\_S} returns $14.67$ - $24.57$ points for $3.2\times$ the GFLOPs, whereas from \texttt{X3D\_S} to \texttt{X3D\_M} returns $4.27 - 10.16$ for a further $2.4\times$.
+Since all three variants share one parameter count, this is the price of sampling a longer clip rather than of a larger model, suggesting the models are capable of longer video contexts and supporting its generalisation.
 
 \paragraph{Limitations.}
-Each configuration was trained once, so differences of one or two points cannot be separated from seed variance.
-Only the RGB modality was used, leaving the depth and skeleton streams of \texttt{AUTSL} unexploited, and GFLOPs measures arithmetic rather than latency on an actual edge device.
-Another limitation is, the model can only predicts 226 Turkish isolated signs, any thus, fails to predict out–of–distribution data.
+First, due to resources availability, each configuration was trained once, i.e. no confidence interval was conducted, and thus the reported result is unreliable in terms of seed variance.
+Second, only the RGB modality was used, leaving the depth and skeleton streams of \texttt{AUTSL} unexploited, which may improve models' generalisation capacity.
+Third, GFLOPs measures arithmetic rather than latency on an actual edge device, and hence we are unable to claim its practical significance on IoT applications.
+Fourth, the model can only predicts 226 Turkish isolated signs, any thus, fails to predict out–of–distribution data, e.g. other signs in Turkish language system and generalising to other sign language systems.
 
 \paragraph{Future work.} \texttt{PyTorchVideo}'s \texttt{X3D} is faster than the original implementation \cite{feichtenhofer2020x3d, pyslowfast}, yet still short of what edge deployment demands.
-\texttt{PyTorchVideo} also supports \texttt{EfficientX3D} for that purpose, but only \texttt{X3D\_XS} and \texttt{X3D\_S} carry \texttt{Kinetics–400} weights, \href{https://github.com/facebookresearch/pytorchvideo/blob/f3142bb05cdb56af0704ab6f0adfb0c7bbafe4a0/pytorchvideo/models/hub/efficient_x3d_mobile_cpu.py}{see here}.
-Since fine--tuning outperforms training from scratch on small datasets \cite{LI2020103853, 7426826}, as applied to sign language recognition in \cite{10627077, töngi2021applicationtransferlearningsign, shuchang2022surveyhumanactionrecognition, han2022efficient}, we leave \texttt{EfficientX3D} to future work for want of pretrained weights.
+\texttt{PyTorchVideo} also supports \texttt{EfficientX3D} for that purpose.
+More importantly, as mentioned earlier, this is an isolated sign language dataset, and thus, inapplicable to real–world demands for real-time translation and continuous video processing.
+Therefore, this current work may be adopted as pretrained weights, due to its inherent semantic meaning, unlike \texttt{Kinetics–400} pretrained models.

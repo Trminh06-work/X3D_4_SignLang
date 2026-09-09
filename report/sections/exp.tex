@@ -136,15 +136,15 @@ The top–$k$ accuracy:
 where $\mathbf 1\{\cdot\}$ denotes the indicator function.
 % As the \texttt{softmax} map is strictly increasing, it preserves the ordering of $\mathbf z_i$, and hence $\mathcal R_k$ may equivalently be taken over logits.
 
-We evaluate $k \in \{1, 3, 5\}$.
-Since $\mathcal R_1 \subseteq \mathcal R_3 \subseteq \mathcal R_5$, these satisfy $\text{Top--}1 \le \text{Top--}3 \le \text{Top--}5$.
+We evaluate $k \in \{1, 3, 5\}$, and note that
+$\mathcal R_1 \subseteq \mathcal R_3 \subseteq \mathcal R_5 \Rightarrow \text{Top--}1 \le \text{Top--}3 \le \text{Top--}5$.
 Top–1 is the strict accuracy, i.e. the fraction of clips whose most probable class is correct, and is the quantity of practical interest for a recognition system.
 Top–5 is the conventional companion metric on \texttt{Kinetics–400} \cite{kay2017kinetics} and \texttt{ImageNet} \cite{Russakovsky2015}.
 Top–3 is included to give balance between strict metric top–1 and easy metric top–5.
 The margin between Top–1 and Top–3 therefore diagnoses the nature of the residual errors, i.e. a small margin indicates genuine failures, whereas a large one indicates near misses within a small group of mutually confusable signs.
 
 \paragraph{Total and trainable parameters.}
-Let $\theta$ be the full set of parameters of a model and $\theta_{\text{tr}} \subseteq \theta$ the subset left unfrozen during optimisation.
+Let $\theta$ be the full set of parameters of a model and $\theta_{\text{tr}} \subseteq \theta$ the subset left unfrozen during training.
 We report the cardinalities $|\theta|$ and $|\theta_{\text{tr}}|$.
 Because our experiments compare fine–tuning strategies rather than competing architectures, this pair separates two costs that a single count would conflate.
 $|\theta|$ governs the memory required to store and deploy the network, whereas $|\theta_{\text{tr}}|$ governs the gradients and optimiser state held during training, and thus the cost of adaptation.
