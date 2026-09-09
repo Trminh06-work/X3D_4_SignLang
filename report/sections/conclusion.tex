@@ -19,6 +19,6 @@ Third, GFLOPs measures arithmetic rather than latency on an actual edge device, 
 Fourth, the model can only predicts 226 Turkish isolated signs, any thus, fails to predict out–of–distribution data, e.g. other signs in Turkish language system and generalising to other sign language systems.
 
 \paragraph{Future work.} \texttt{PyTorchVideo}'s \texttt{X3D} is faster than the original implementation \cite{feichtenhofer2020x3d, pyslowfast}, yet still short of what edge deployment demands.
-\texttt{PyTorchVideo} also supports \texttt{EfficientX3D} for that purpose.
+\texttt{PyTorchVideo} also supports \texttt{EfficientX3D} for that purpose, so future migration to this model may facilitate more inference speed.
 More importantly, as mentioned earlier, this is an isolated sign language dataset, and thus, inapplicable to real–world demands for real-time translation and continuous video processing.
 Therefore, this current work may be adopted as pretrained weights, due to its inherent semantic meaning, unlike \texttt{Kinetics–400} pretrained models.
